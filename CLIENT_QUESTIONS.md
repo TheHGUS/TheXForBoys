@@ -22,12 +22,29 @@ hide them. They are never visible unless you toggle them.
 | 7 | How You Can Help | **“Give via PayPal”** as the middle option’s title | `PAYPAL` |
 | 8 | Connect | **“you@email.com”** placeholder and **“You’re on the list.”** confirmation | `NO BACKEND` |
 
+_No new studio-written lines were added in round 02. The copy above is
+unchanged from round 01._
+
 > There are no other invented claims, numbers, names or statistics on the site.
 > Every other word is lifted from the current thexforboys.org homepage.
 
 ---
 
-## 2. The X for Girls section — needs confirming before we keep it
+## 2. The logo file (new — blocks the animation being pixel-exact)
+
+Round 02 rebuilt the logo animation so nothing is redrawn by hand: the real
+white PNG is used for every full-logo moment (intro end state, equation
+finale, nav, footer), and the raised fist “pops” by clipping **the same PNG**
+to the fist region rather than drawing a hand.
+
+- **Please send the vector file** (SVG, EPS or AI). With it we can:
+  - place the fist clip region exactly instead of estimating it
+    (currently `top 3% / right 12% / bottom 62% / left 50%`);
+  - cut a real favicon and print/PDF assets;
+  - set the hero X to match the printed mark exactly.
+- Flagged in the UI as `LOGO FILE` on the footer logo (press **Q**).
+
+## 3. The X for Girls section — needs confirming before we keep it
 
 - **What is the program actually called?** The donate block says “The X for
   Boys & Girls”. Is the official name *The X for Boys & Girls*, or is there a
@@ -43,7 +60,7 @@ hide them. They are never visible unless you toggle them.
 
 ---
 
-## 3. The Albany statistic
+## 4. The Albany statistic
 
 > “Albany, GA has the highest concentrated poverty rate in Georgia. It is also
 > ranked the 7th most dangerous city in U.S. with offenders being most likely
@@ -61,7 +78,7 @@ hide them. They are never visible unless you toggle them.
 
 ---
 
-## 4. Social handles
+## 5. Social handles
 
 The site says **“Follow @thexforboys”**, but the links we were given point at:
 
@@ -79,7 +96,7 @@ The site says **“Follow @thexforboys”**, but the links we were given point a
 
 ---
 
-## 5. Also worth a decision (lower priority)
+## 6. Also worth a decision (lower priority)
 
 - **Programme treatment:** we presented the three workshops as real objects on
   a workbench — a mechanic’s work order, a job ticket pinned to a blueprint,
@@ -100,3 +117,11 @@ The site says **“Follow @thexforboys”**, but the links we were given point a
   not from the final crops. Please skim it once the photos are final.
 - **Photos:** we only had the images listed in `src/content/images.ts`. If you
   have a stronger hero, or more shop/girls photos, send them over.
+- **Contact sheet:** we dropped `DSC01956.JPG` from the `#clubphotos` roll
+  because it is the full-bleed photograph in The X for Girls section directly
+  above it — on mobile you saw the same picture twice in a row. Tell us if you
+  would rather it stayed in the roll.
+- **Wishlists:** the “Registries & Wishlists” card no longer shows the Amazon
+  screenshot (it cropped badly). It now uses a line illustration of a shipping
+  box whose packing tape forms an X. Happy to swap it back if you have a
+  cleanly-cropped version.

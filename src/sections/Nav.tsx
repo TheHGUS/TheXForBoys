@@ -1,25 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../lib/gsap';
-import { LOGO_PNG } from '../content/images';
+import { LogoImage } from '../components/LogoImage';
 import { links, nav, site } from '../content/copy';
-import { VarsityXShapes } from '../components/svg/LogoMark';
 import { XPattern } from '../components/XPattern';
 import { lockScroll, unlockScroll } from '../lib/scroll';
 import { Flag } from '../components/Flag';
 
 /**
  * NAV
- * Transparent over the hero, solid ink at 90% once you scroll. The small X
- * next to the lockup fills with red from the bottom up as the page scrolls.
+ * Transparent over the hero, solid ink at 90% once you scroll. Scroll progress
+ * is a 2px red line along the bottom edge of the nav — round 02 removed the
+ * second X mark, which read as a glitch next to the lockup.
  */
 
-export function Nav({
-  logoRef,
-  enableProgress = true,
-}: {
-  logoRef: React.RefObject<HTMLSpanElement>;
-  enableProgress?: boolean;
-}) {
+export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
   const progressRef = useRef<HTMLSpanElement>(null);
@@ -36,7 +30,9 @@ export function Nav({
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
       const el = progressRef.current;
-      if (el) el.style.clipPath = `inset(${((1 - p) * 100).toFixed(2)}% 0 0 0)`;
+      // scaleX on a full-width bar: cheaper than rewriting clip-path, and it
+      // composites on the GPU.
+      if (el) el.style.transform = `scaleX(${p.toFixed(4)})`;
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -85,38 +81,11 @@ export function Nav({
         }`}
       >
         <div className="mx-auto flex h-[68px] w-full max-w-shell items-center justify-between gap-4 px-5 sm:px-8 lg:px-14">
-          {/* lockup + scroll progress */}
-          <a
-            href={links.home}
-            className="flex items-center gap-3 rounded-none"
-            aria-label={`${site.name} — home`}
-          >
-            <span ref={logoRef} className="block">
-              <img
-                src={LOGO_PNG}
-                alt=""
-                width={132}
-                height={44}
-                className="h-8 w-auto sm:h-10"
-                decoding="async"
-              />
+          {/* lockup — the real logo PNG, never a redraw */}
+          <a href={links.home} className="flex items-center" aria-label={`${site.name} — home`}>
+            <span ref={logoRef as React.RefObject<HTMLSpanElement>} className="block">
+              <LogoImage priority label="" className="h-8 w-auto sm:h-10" />
             </span>
-            {enableProgress ? (
-              <span className="relative block h-[22px] w-[18px]" aria-hidden="true">
-                <svg viewBox="17 21 106 106" className="absolute inset-0 h-full w-full text-off/25">
-                  <VarsityXShapes />
-                </svg>
-                <span
-                  ref={progressRef}
-                  className="absolute inset-0 block"
-                  style={{ clipPath: 'inset(100% 0 0 0)' }}
-                >
-                  <svg viewBox="17 21 106 106" className="h-full w-full text-red">
-                    <VarsityXShapes />
-                  </svg>
-                </span>
-              </span>
-            ) : null}
           </a>
 
           {/* desktop links */}
@@ -159,6 +128,14 @@ export function Nav({
             </button>
           </div>
         </div>
+
+        {/* scroll progress: a 2px red line along the bottom edge */}
+        <span
+          className="absolute inset-x-0 bottom-0 block h-[2px] origin-left bg-red"
+          aria-hidden="true"
+        >
+          <span ref={progressRef} className="block h-full w-full origin-left scale-x-0 bg-red" />
+        </span>
       </header>
 
       {/* ---------------- mobile menu ---------------- */}
@@ -173,7 +150,7 @@ export function Nav({
         >
           <XPattern opacity={0.05} size={110} />
           <div className="relative z-10 flex h-[68px] items-center justify-between px-5">
-            <img src={LOGO_PNG} alt="" width={132} height={44} className="h-8 w-auto" />
+            <LogoImage label="" className="h-8 w-auto" />
             <button
               ref={closeRef}
               type="button"

@@ -1,5 +1,5 @@
 import { useId, useMemo, type SVGProps } from 'react';
-import { greaseCircle, markerCheck, markerScribble, markerStroke, stampFrame } from '../../lib/wobble';
+import { greaseCircle, markerCheck, markerStroke, scribbleLoops, stampFrame } from '../../lib/wobble';
 
 /**
  * Every "marker" mark on the site. All generated SVG paths with wobbly,
@@ -9,19 +9,24 @@ import { greaseCircle, markerCheck, markerScribble, markerStroke, stampFrame } f
 
 type MarkerProps = Omit<SVGProps<SVGSVGElement>, 'strokeWidth'> & { weight?: number };
 
-/** One continuous red scribble, sized to fill whatever box it sits in. */
-export function MarkerScribble({
+/**
+ * The scrawl an equation term hides behind before it resolves into type:
+ * 2–3 overlapping looping marker strokes, uneven, drawn on one after the
+ * other. No `vector-effect: non-scaling-stroke` here on purpose — the paths
+ * are drawn with stroke-dashoffset, and the dash length has to be measured in
+ * the same user units `getTotalLength()` reports.
+ */
+export function MarkerScribbleLoops({
   className,
   style,
   seed = 11,
-  passes = 4,
-  amp = 4,
-  weight = 9,
+  strokes = 3,
+  weight = 13,
   ...rest
-}: MarkerProps & { seed?: number; passes?: number; amp?: number }) {
-  const d = useMemo(
-    () => markerScribble({ x: 6, y: 14, w: 588, h: 92, passes, amp, seed }),
-    [seed, passes, amp],
+}: MarkerProps & { seed?: number; strokes?: number }) {
+  const ds = useMemo(
+    () => scribbleLoops({ x: 10, y: 22, w: 580, h: 76, strokes, seed }),
+    [seed, strokes],
   );
   return (
     <svg
@@ -33,19 +38,49 @@ export function MarkerScribble({
       aria-hidden="true"
       focusable="false"
     >
-      <path
-        d={d}
-        className="wobble-path"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={weight}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-      />
+      <g fill="none" stroke="currentColor" strokeWidth={weight} strokeLinecap="round" strokeLinejoin="round">
+        {ds.map((d, i) => (
+          <path key={i} className="scribble-path" d={d} />
+        ))}
+      </g>
     </svg>
   );
 }
+
+import { forwardRef } from 'react';
+
+/**
+ * A short, tight scrawl for the "YOU + ___ = X" blank: two looping strokes
+ * that fill whatever box they're given. Forwarded so the caller can reach the
+ * paths and draw them on.
+ */
+export const MarkerScrawl = forwardRef<
+  SVGSVGElement,
+  MarkerProps & { seed?: number; strokes?: number }
+>(function MarkerScrawl({ className, style, seed = 7, strokes = 2, weight = 26, ...rest }, ref) {
+  const ds = useMemo(
+    () => scribbleLoops({ x: 12, y: 26, w: 576, h: 68, strokes, seed }),
+    [seed, strokes],
+  );
+  return (
+    <svg
+      {...rest}
+      ref={ref}
+      viewBox="0 0 600 120"
+      preserveAspectRatio="none"
+      className={className}
+      style={style}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g fill="none" stroke="currentColor" strokeWidth={weight} strokeLinecap="round" strokeLinejoin="round">
+        {ds.map((d, i) => (
+          <path key={i} className="scribble-path" d={d} />
+        ))}
+      </g>
+    </svg>
+  );
+});
 
 /** A marker underline that draws itself — used under "Donate Now". */
 export function MarkerUnderline({

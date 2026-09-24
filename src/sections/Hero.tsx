@@ -5,17 +5,26 @@ import { useReducedMotion } from '../lib/motion';
 import { HERO_MAIN } from '../content/images';
 import { hero, links } from '../content/copy';
 import { Img } from '../components/ui';
-import { LogoMark } from '../components/svg/LogoMark';
+import { XGlyph, X_EM_PER_CAP } from '../components/svg/XGlyph';
 import { MarkerUnderline } from '../components/svg/Marker';
 import { Flag } from '../components/Flag';
 import { scrollToId } from '../lib/scroll';
 
 /**
  * HERO
- * Full-bleed photograph, darkened with an ink gradient from the bottom.
- * "SOLVING FOR" + the outlined varsity X as the final word, letters rising
- * out of a mask once the intro has handed over.
+ * Full-bleed photograph with a single bottom-up ink gradient behind the copy —
+ * no full-frame wash, so the kids' faces stay bright. "SOLVING FOR" on line 1,
+ * the outlined varsity X on line 2 at 1.42x line 1's cap height, so the X
+ * reads as the payoff rather than a punctuation mark.
  */
+
+/**
+ * How tall the X stands, in multiples of the headline's cap height.
+ * Libre Franklin's cap height is 0.742em (measured off the real 900-weight
+ * TTF). ROUND-02 asks for at least 1.4x — 1.42 leaves a little margin.
+ */
+const X_CAPS = 1.42;
+
 export function Hero({ ready }: { ready: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
@@ -86,28 +95,38 @@ export function Hero({ ready }: { ready: boolean }) {
           sizes="100vw"
         />
       </div>
-      {/* ink gradient from the bottom */}
+
+      {/*
+        The only darkening on the page: one bottom-up ink gradient behind the
+        copy. The upper two-thirds of the frame is left completely alone.
+      */}
       <div
-        className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/60"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[65%]"
+        style={{
+          background:
+            'linear-gradient(to top, #161616 0%, rgba(22,22,22,0.78) 32%, rgba(22,22,22,0.34) 62%, rgba(22,22,22,0) 100%)',
+        }}
         aria-hidden="true"
       />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink to-transparent" aria-hidden="true" />
 
       {/* copy */}
       <div className="relative z-10 flex h-full flex-col justify-end pb-[8vh] pt-[68px]">
         <div className="shell">
-          <h1 className="display text-off">
+          <h1 className="display text-fluid-hero text-off">
             <span className="mask-line">
               <span className="hero-line-inner block">{hero.headlineTop}</span>
             </span>
             <span className="mask-line">
-              <span className="hero-line-inner relative block w-[min(62vw,1.05em)]">
-                <LogoMark
-                  parts={['x']}
-                  xVariant="outline"
-                  fit="x"
+              <span
+                className="hero-line-inner relative block"
+                style={{ height: `${(X_EM_PER_CAP * X_CAPS).toFixed(4)}em` }}
+              >
+                <XGlyph
+                  variant="solid"
+                  inlineColor="#F70303"
+                  inlineWeight={3.4}
                   title={hero.glyphAlt}
-                  className="block h-auto w-full text-off"
+                  className="absolute bottom-0 left-0 block h-full w-auto text-off"
                 />
               </span>
             </span>

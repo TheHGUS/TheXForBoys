@@ -1,5 +1,5 @@
 import { useId, type CSSProperties } from 'react';
-import { VarsityXShapes, X_TIGHT_BOX } from './svg/LogoMark';
+import { VarsityXShapes, X_TIGHT_BOX } from './svg/XGlyph';
 import { useReducedMotion } from '../lib/motion';
 import { gsap } from '../lib/gsap';
 import { useEffect, useRef } from 'react';
@@ -56,7 +56,7 @@ export function XPattern({
       aria-hidden="true"
     >
       <div ref={wrapRef} className="absolute -inset-[12%] h-[124%] w-[124%] will-change-transform">
-        <svg className="h-full w-full" focusable="false">
+        <svg className="h-full w-full" focusable="false" aria-hidden="true">
           <defs>
             <pattern id={pid} width={size} height={size} patternUnits="userSpaceOnUse">
               <g

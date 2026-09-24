@@ -4,6 +4,7 @@ import { connect } from '../content/copy';
 import { MonoLabel } from '../components/ui';
 import { SocialIcon } from '../components/svg/Social';
 import { MarkerCheck } from '../components/svg/Marker';
+import { XPattern } from '../components/XPattern';
 import { Flag } from '../components/Flag';
 import { useReducedMotion } from '../lib/motion';
 
@@ -46,10 +47,12 @@ export function Connect() {
     <section
       ref={rootRef}
       id="connect"
-      className="relative overflow-hidden border-t border-white/10 bg-ink py-16 sm:py-20 lg:py-28"
+      className="relative overflow-hidden border-t border-white/10 bg-ink py-12 sm:py-14 lg:py-16"
       aria-labelledby="connect-heading"
     >
-      <div className="shell relative z-10 grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
+      <XPattern opacity={0.04} size={160} />
+
+      <div className="shell relative z-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
         {/* ---------------- sign up ---------------- */}
         <div>
           <h2
@@ -139,7 +142,7 @@ export function Connect() {
               </li>
             ))}
           </ul>
-          <div className="relative mt-6 h-6">
+          <div className="relative mt-5">
             <Flag id="q-socials" place="tl" />
           </div>
         </div>
