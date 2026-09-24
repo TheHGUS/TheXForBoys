@@ -227,7 +227,7 @@ export function Equation() {
       gsap.set(scribbles, { opacity: 1 });
       gsap.set(words, { opacity: 0 });
       gsap.set(allStages, { autoAlpha: 0 });
-      gsap.set(slots, { color: '#4A4A4A' });
+      gsap.set(slots, { color: '#5E5E5E' });
       gsap.set(ops, { opacity: 0 });
       gsap.set(finale, { autoAlpha: 0 });
       if (equals) gsap.set(equals, { opacity: 0 });

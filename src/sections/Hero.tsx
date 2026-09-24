@@ -101,7 +101,7 @@ export function Hero({ ready }: { ready: boolean }) {
               <span className="hero-line-inner block">{hero.headlineTop}</span>
             </span>
             <span className="mask-line">
-              <span className="hero-line-inner relative block w-[min(62vw,0.78em)]">
+              <span className="hero-line-inner relative block w-[min(62vw,1.05em)]">
                 <LogoMark
                   parts={['x']}
                   xVariant="outline"
