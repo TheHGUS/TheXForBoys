@@ -1,34 +1,79 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../lib/gsap';
+import { drawOn, prepStrokes } from '../lib/draw';
 import { help } from '../content/copy';
-import { WISHLIST_IMG } from '../content/images';
-import { Img, MonoLabel } from '../components/ui';
-import { LogoMark } from '../components/svg/LogoMark';
+import { MonoLabel } from '../components/ui';
+import { XGlyph } from '../components/svg/XGlyph';
+import { MarkerScrawl } from '../components/svg/Marker';
+import { ShipBox as ShipBoxArt } from '../components/svg/Illustrations';
 import { XPattern } from '../components/XPattern';
 import { Flag } from '../components/Flag';
 import { hasFinePointer, useReducedMotion } from '../lib/motion';
 
 /**
  * HOW YOU CAN HELP
- * YOU + ___ = X. The blank fills in as you hover or tap each option. Big red
- * buttons with a magnetic pull on desktop (max 8px).
+ * YOU + ___ = X. The blank fills in with the hovered or tapped option's word,
+ * in the same marker-then-type language as the Equation section: the scrawl
+ * draws, then the word resolves out of it.
+ *
+ * On mobile the first option is pre-filled so the line is never empty.
  */
+
 export function Help() {
   const [active, setActive] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement>(null);
   const blankRef = useRef<HTMLSpanElement>(null);
+  const scrawlRef = useRef<SVGSVGElement>(null);
   const reduced = useReducedMotion();
 
-  /* the blank swaps with a little stamp */
+  /*
+   * Mobile has no hover, so the blank would sit empty until someone taps.
+   * Pre-fill it with the first option and let taps change it from there.
+   */
+  useEffect(() => {
+    if (hasFinePointer()) return;
+    setActive(help.options[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const activeOption = help.options.find((o) => o.id === active);
+  const filled = activeOption?.word ?? '';
+
+  /* the blank: marker scrawl draws, then the word resolves out of it */
   useEffect(() => {
     const el = blankRef.current;
-    if (!el || reduced) return;
-    gsap.fromTo(
-      el,
-      { yPercent: 40, opacity: 0, scale: 0.9 },
-      { yPercent: 0, opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2)', overwrite: true },
-    );
-  }, [active, reduced]);
+    if (!el) return;
+
+    const word = el.querySelector('.help-blank-word');
+    const scrawl = scrawlRef.current;
+    const paths = scrawl?.querySelectorAll('path');
+
+    if (reduced) {
+      if (scrawl) gsap.set(scrawl, { opacity: 0 });
+      if (word) gsap.set(word, { opacity: 1, yPercent: 0 });
+      return;
+    }
+
+    if (paths?.length) prepStrokes(paths);
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+      if (scrawl) {
+        tl.set(scrawl, { opacity: 1 }, 0);
+        drawOn(tl, paths, { at: 0, duration: 0.34, stagger: 0.1, ease: 'power1.inOut' });
+        tl.to(scrawl, { opacity: 0, duration: 0.22, ease: 'power2.out' }, 0.42);
+      }
+      if (word) {
+        tl.fromTo(
+          word,
+          { opacity: 0, yPercent: 45 },
+          { opacity: 1, yPercent: 0, duration: 0.4, ease: 'expo.out' },
+          0.38,
+        );
+      }
+    }, el);
+    return () => ctx.revert();
+  }, [filled, reduced]);
 
   /* magnetic hover, desktop only, max 8px */
   useEffect(() => {
@@ -60,8 +105,6 @@ export function Help() {
     return () => cleanups.forEach((c) => c());
   }, [reduced]);
 
-  const activeOption = help.options.find((o) => o.id === active);
-
   return (
     <section
       ref={rootRef}
@@ -87,27 +130,29 @@ export function Help() {
         >
           <span>{help.equationPrefix}</span>
           <span className="text-red">{help.equationOperator}</span>
-          <span
-            ref={blankRef}
-            className="inline-block min-w-[6ch] border-b-[3px] border-red text-red"
-            aria-live="polite"
-          >
-            {activeOption ? activeOption.word : help.equationBlankDefault}
+          <span ref={blankRef} className="relative inline-block min-w-[6ch]" aria-live="polite">
+            {/* the word holds the width so the line never reflows */}
+            <span className="help-blank-word inline-block border-b-[3px] border-red text-red">
+              {filled || help.equationBlankDefault}
+            </span>
+            <MarkerScrawl ref={scrawlRef} className="absolute inset-0 h-full w-full text-red" seed={7} />
           </span>
           <span className="text-grey">{help.equationEquals}</span>
           <span className="inline-block h-[1.1em] w-[1.1em] text-off">
-            <LogoMark parts={['x']} xVariant="solid" fit="x" className="h-full w-full" />
+            <XGlyph variant="solid" className="h-full w-full" />
           </span>
           <span className="relative ml-2">
             <Flag id="q-help-equation" place="tr" />
           </span>
         </div>
 
-        {/* options */}
+        {/* options — every CTA shares one style and sits on the bottom edge */}
         <div className="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-3 lg:gap-8">
           {help.options.map((o, i) => (
             <div
               key={o.id}
+              /* flex-col + mt-auto on the CTA block pins it to the bottom, so
+                 all three buttons line up however long the copy above is. */
               className="flex flex-col border border-white/10 bg-ink/60 p-5 sm:p-6"
               onMouseEnter={() => setActive(o.id)}
               onFocus={() => setActive(o.id)}
@@ -125,18 +170,13 @@ export function Help() {
                 {o.title}
               </h3>
 
-              <p className="mt-3 flex-1 text-[0.95rem] leading-[1.5] text-grey">{o.body}</p>
+              <p className="mt-3 text-[0.95rem] leading-[1.5] text-grey">{o.body}</p>
 
               {o.id === 'supplies' ? (
-                <Img
-                  image={WISHLIST_IMG}
-                  className="mt-5 aspect-[4/3] w-[58%] border border-white/10"
-                  imgClassName="h-full w-full object-cover"
-                  sizes="(min-width: 1024px) 20vw, 45vw"
-                />
+                <ShipBoxArt className="mt-5 h-auto w-[58%] max-w-[220px] text-off" />
               ) : null}
 
-              <div className="mt-6">
+              <div className="mt-auto pt-6">
                 <span data-magnetic className="inline-block will-change-transform">
                   <a
                     href={o.href}

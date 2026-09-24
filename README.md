@@ -20,7 +20,26 @@ npm run dev          # http://localhost:5173
 npm run build        # type-check + production build to /dist
 npm run preview      # serve the production build
 npm run typecheck    # types only
+npm run check        # static audit: brand rules + round acceptance criteria
 ```
+
+`npm run check` renders the real components with `renderToStaticMarkup` and
+asserts against the markup they produce — no browser needed. It covers the
+“no hand-drawn logo parts” rule, the brand palette, the equation’s two-zone
+split and single-X finale, the programmes’ mobile stacking, CTA consistency,
+and image alt text / dimensions. Geometry that is pure measurement (hero
+headline width, exploded-brake piece ordering) is checked the same way.
+
+`scripts/measure-type.mjs` reads the real Libre Franklin 900 TTF and reports
+exact advance widths, which is how the hero’s fluid clamp was derived:
+
+```bash
+node scripts/measure-type.mjs path/to/LibreFranklin_900Black.ttf
+```
+
+`npm run preview:art` writes PNGs of every piece of line art to a folder, for
+reviewing the drawings without running the site. It needs `sharp`
+(a devDependency — it is not part of the site bundle).
 
 Node 18+ (built and tested on Node 22).
 
@@ -107,10 +126,11 @@ src/
     Grain.tsx          site-wide film grain (feTurbulence)
     XPattern.tsx       tiled brand X pattern
     Flag.tsx           Q-key sticky notes
+    LogoImage.tsx      the REAL logo (PNG) + the base/fist split for the pop
     svg/
-      LogoMark.tsx     varsity X + shield + fist (animatable)
+      XGlyph.tsx       the plain outlined X — typographic glyph only
       Marker.tsx       marker scribbles, underlines, checks, stamps
-      Illustrations.tsx disc brake, blueprint/stud wall, book spread
+      Illustrations.tsx exploded disc brake, stud wall, book, shipping box
       Social.tsx       line social icons
   sections/
     Intro.tsx  Nav.tsx  Hero.tsx  Equation.tsx  Programs.tsx
@@ -121,15 +141,35 @@ src/
 
 ## The mark
 
-The white logo PNG is used as-is for the nav and footer lockup. For animation
-we rebuilt it as SVG in `src/components/svg/LogoMark.tsx` — three independent
-parts (`shield`, `x`, `fist`) sharing one coordinate space, so they can move
-separately:
+**The logo is never redrawn.** The white PNG is the only source for every
+full-logo moment — nav, intro end state, equation finale, footer (see
+`src/components/LogoImage.tsx`).
 
-- `xVariant="solid"` — thick X with the inner inline knockout (matches the PNG)
-- `xVariant="outline"` — hollow varsity outline (hero glyph, footer)
-- `xVariant="stroke"` — the same outline as two closed paths, so it can draw
+The one thing we do recreate as SVG is the **plain outlined X**, used purely as
+a *typographic glyph* — the last letter of `SOLVING FOR X`, the mark the
+equation resolves into, the X bleeding off the footer, and the tile in the
+brand pattern. No fist, no shield. It lives in `src/components/svg/XGlyph.tsx`:
+
+- `variant="solid"` — thick X with the inner inline knocked out (matches the
+  PNG’s X); pass `inlineColor` to paint that inline instead (the hero uses red)
+- `variant="outline"` — hollow varsity outline (footer)
+- `variant="stroke"` — the same outline as two closed paths, so it can draw
   itself with `stroke-dashoffset` (the Albany hard cut)
+
+### Animating a part of the logo
+
+`LogoLockupSplit` renders **the same PNG twice**, clipped into two
+non-overlapping pieces, so the raised fist can pop without ever drawing a hand:
+
+```
+.logo-base-wrap   inset clip    <-- the intro's mask-wipe animates this
+  img.logo-base   polygon clip  <-- keeps the fist cut out at all times
+.logo-fist-wrap   scale 0.85 -> 1, back.out(2)
+```
+
+Two nested clips, because one element can only carry one `clip-path`. If the
+wipe overwrote the polygon, the fist would reappear inside the base and the pop
+would have nothing to pop.
 
 ---
 

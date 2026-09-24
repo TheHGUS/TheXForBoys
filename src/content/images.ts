@@ -44,9 +44,23 @@ function img(file: string, { alt, ratio = [3, 2], large = 1800, small = 900 }: I
   };
 }
 
-/** The white logo PNG — used as-is for the nav + footer lockup. */
+/**
+ * The white logo PNG — the ONLY logo source (brief/PROJECT_BRIEF.md).
+ * Used as-is for the nav, the intro end state, the equation finale and the
+ * footer. It is never redrawn.
+ */
 export const LOGO_PNG =
   'https://img1.wsimg.com/isteam/ip/f58551bb-d6b3-44c4-b114-6ddab0ea1f56/The%20X%20for%20boys%20logo%2004-02%20WHITE.png';
+
+/**
+ * Intrinsic width/height attributes for the logo, so the browser can reserve
+ * the right box before it arrives. The lockup is portrait (shield with the
+ * fist breaking out of the top-right arm). Every render of the logo also sets
+ * `object-contain`, so even if this hint is slightly off the artwork is never
+ * stretched — and NOTES_FROM_BUILDER asks the studio to confirm the real pixel
+ * dimensions with the vector file.
+ */
+export const LOGO_INTRINSIC = { w: 132, h: 158 } as const;
 
 export const HERO_MAIN = img('DSC06682-2.jpg', {
   alt: 'Boys and mentors of The “X” for Boys lined up together in their programme shirts at the Delta hangar in Albany, Georgia.',
@@ -83,12 +97,13 @@ export const READ_2 = img('115374703_304621120733579_3822870454740553317_.jpg', 
   alt: 'A boy reading aloud with the group at the weekly book club.',
 });
 
-export const WISHLIST_IMG = img('Amazon-Wish-List.jpg', {
-  alt: 'The Amazon wish list of supplies The “X” for Boys needs for its workshops.',
-  ratio: [4, 3],
-});
-
-/** Contact sheet roll — every gallery photo, in the order specified. */
+/**
+ * Contact sheet roll — every gallery photo, in the order specified.
+ *
+ * DSC01956.JPG is deliberately NOT in the roll: it is the full-bleed
+ * photograph in The X for Girls section immediately above, and showing it
+ * twice in a row while scrolling on mobile read as a mistake (ROUND-02 P2 #12).
+ */
 export const GALLERY: ImageAsset[] = [
   img('DSC06682-2.jpg', {
     alt: 'Boys and mentors of The “X” for Boys lined up together at the Delta hangar.',
@@ -108,11 +123,6 @@ export const GALLERY: ImageAsset[] = [
   }),
   img('_DSC8134.JPG', {
     alt: 'A street view of Albany, Georgia at golden hour.',
-    large: 1200,
-    small: 600,
-  }),
-  img('DSC01956.JPG', {
-    alt: 'Girls in The X for Boys & Girls shirts smiling together at an event.',
     large: 1200,
     small: 600,
   }),

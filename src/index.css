@@ -62,8 +62,23 @@
   }
 
   /* Fluid clamp helper: font-size: clamp(min, vw, max) */
+  /*
+   * Hero headline. The 7.4vw middle term is measured, not guessed:
+   * "SOLVING FOR" in Libre Franklin 900 at -0.03em tracking is 6.767em wide
+   * (scripts/measure-type.mjs reads the real TTF), so at 7.4vw the headline
+   * lands on ~50% of the viewport at every desktop width — inside the 45–55%
+   * target in brief/ROUND-02.md. The 11vw the brief floats would put it at
+   * ~74% and burst the gutters; see brief/NOTES_FROM_BUILDER.md.
+   */
   .text-fluid-hero {
-    font-size: clamp(2.4rem, 11vw, 10.5rem);
+    font-size: clamp(2.8rem, 7.4vw, 11rem);
+  }
+  /* Below the 375px design floor, let it shrink so it can never wrap or
+     overflow (studio rule: no horizontal page scroll, ever). */
+  @media (max-width: 359px) {
+    .text-fluid-hero {
+      font-size: 12.4vw;
+    }
   }
   .text-fluid-xl {
     font-size: clamp(2rem, 7.2vw, 6rem);

@@ -67,6 +67,11 @@ export const questions = {
     question:
       '“Give via PayPal” currently links to /donate. Confirm the real PayPal button / link for the next stage.',
   },
+  'q-logo-vector': {
+    label: 'LOGO FILE',
+    question:
+      'We only have the white PNG. Please send the vector (SVG / EPS / AI) so the fist-pop animation can be pixel-exact, and so we can cut a proper favicon and print files.',
+  },
   'q-email-signup': {
     label: 'NO BACKEND',
     question:

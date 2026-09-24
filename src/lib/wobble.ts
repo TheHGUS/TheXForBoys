@@ -131,36 +131,66 @@ export function greaseCircle({
   return smoothPath(pts);
 }
 
-type ScribbleOpts = {
+type ScribbleLoopsOpts = {
   x: number;
   y: number;
   w: number;
   h: number;
-  /** How many back-and-forth passes. */
-  passes?: number;
-  amp?: number;
+  /** How many separate looping strokes to generate (2–3 reads best). */
+  strokes?: number;
   seed?: number;
 };
 
 /**
- * A rough marker scribble that fills a box — used for the equation terms
- * before they resolve into type.
+ * Two or three overlapping *looping* marker strokes — the scrawl a term hides
+ * behind before it resolves into type. Round 02 specifically asked for
+ * "2–3 overlapping looping marker strokes, uneven", so each stroke is its own
+ * path (drawn on one after the other) and each one is a real loop: the x
+ * advance reverses partway through every cycle, which is what makes it read
+ * as a hand going back over itself rather than a zig-zag.
  */
-export function markerScribble({ x, y, w, h, passes = 4, amp = 3.4, seed = 11 }: ScribbleOpts): string {
+export function scribbleLoops({
+  x,
+  y,
+  w,
+  h,
+  strokes = 3,
+  seed = 11,
+}: ScribbleLoopsOpts): string[] {
   const rand = mulberry32(seed);
-  const pts: Pt[] = [];
-  const steps = 16;
-  for (let pass = 0; pass < passes; pass++) {
-    const dir = pass % 2 === 0 ? 1 : -1;
-    const yy = y + h * (pass / Math.max(1, passes - 1)) + (rand() - 0.5) * 2;
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const px = x + (dir === 1 ? t * w : (1 - t) * w);
-      const py = yy + Math.sin(t * Math.PI * (2 + pass)) * amp + (rand() - 0.5) * amp * 0.9;
+  const out: string[] = [];
+
+  for (let s = 0; s < strokes; s++) {
+    // uneven on purpose: different loop counts, baselines, heights, phases
+    const loops = 2 + Math.round(rand() * 2); // 2..4
+    const base = y + h * ((s + 0.5) / strokes) + (rand() - 0.5) * h * 0.12;
+    const amp = h * (0.12 + rand() * 0.09);
+    const phase = rand() * Math.PI * 2;
+    const tilt = (rand() - 0.5) * h * 0.1;
+    const points = 24 * loops;
+
+    /*
+     * Horizontal advance stays mostly monotonic, with a small sinusoidal
+     * wobble riding on it (x = w*t + A*sin(a)). The stroke only doubles back
+     * when A * 2*pi*loops > w, so A just above w / (2*pi*loops) is what makes
+     * real loops appear — while keeping the whole scrawl inside the box,
+     * because the wobble is capped at +/- A rather than accumulating.
+     */
+    const loopAmp = (w / (Math.PI * 2 * loops)) * (1.25 + rand() * 0.4);
+
+    const pts: Pt[] = [];
+    for (let i = 0; i <= points; i++) {
+      const t = i / points;
+      const a = t * Math.PI * 2 * loops + phase;
+      // taper at both ends so the stroke starts and ends like a pen lift
+      const env = Math.sin(Math.PI * Math.min(1, t * 1.08)) ** 0.4;
+      const px = x + w * t + loopAmp * Math.sin(a) * env;
+      const py = base + amp * Math.sin(a + Math.PI / 2) * env + tilt * t + (rand() - 0.5) * h * 0.04;
       pts.push([px, py]);
     }
+    out.push(smoothPath(pts));
   }
-  return smoothPath(pts);
+  return out;
 }
 
 /** Hand-drawn check mark: short down-stroke, long kick up. */

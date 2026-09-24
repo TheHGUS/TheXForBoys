@@ -27,7 +27,9 @@ export function ClubPhotos() {
   const drawCircle = useCallback(
     (index: number, on: boolean) => {
       if (reduced) return;
-      const el = trackRef.current?.querySelector<HTMLElement>(`[data-frame="${index}"] .grease path`);
+      const el = trackRef.current?.querySelector<HTMLElement>(
+        `[data-frame="${index}"] .grease path, [data-frame="${index}"] .frameno path`,
+      );
       if (!el) return;
       const len = (el as unknown as SVGGeometryElement).getTotalLength?.() ?? 0;
       if (!len) return;
@@ -44,7 +46,7 @@ export function ClubPhotos() {
   /* ---------------- hide every grease circle until it's drawn ---------------- */
   useEffect(() => {
     if (reduced) return;
-    const paths = trackRef.current?.querySelectorAll('.grease path');
+    const paths = trackRef.current?.querySelectorAll('.grease path, .frameno path');
     prepStrokes(paths);
   }, [reduced]);
 
@@ -222,6 +224,7 @@ export function ClubPhotos() {
               key={`${img.src}-${i}`}
               index={i}
               image={img}
+              isActive={active === i}
               onEnter={() => fine.current && drawCircle(i, true)}
               onLeave={() => fine.current && drawCircle(i, false)}
               onOpen={() => setLightbox(i)}
@@ -249,12 +252,14 @@ export function ClubPhotos() {
 function Frame({
   index,
   image,
+  isActive,
   onEnter,
   onLeave,
   onOpen,
 }: {
   index: number;
   image: (typeof GALLERY)[number];
+  isActive: boolean;
   onEnter: () => void;
   onLeave: () => void;
   onOpen: () => void;
@@ -307,9 +312,26 @@ function Frame({
         </button>
       </div>
       <figcaption className="mt-2 flex items-baseline justify-between gap-3">
-        <MonoLabel className="text-grey/75">
-          {club.frameLabel} {String(index + 1).padStart(3, '0')}
-        </MonoLabel>
+        {/*
+          The frame number, circled in grease pencil when this frame is the
+          current one — the way a photographer marks up a contact sheet.
+        */}
+        <span className="relative inline-block px-2 py-1">
+          <MonoLabel
+            className={
+              isActive
+                ? 'relative z-10 text-off transition-colors duration-200'
+                : 'relative z-10 text-grey/75 transition-colors duration-200'
+            }
+          >
+            {club.frameLabel} {String(index + 1).padStart(3, '0')}
+          </MonoLabel>
+          <GreaseCircle
+            className="frameno pointer-events-none absolute -inset-[14%] h-[128%] w-[128%] text-red"
+            weight={3}
+            seed={3 + index * 5}
+          />
+        </span>
         <MonoLabel className="text-grey/75">35MM</MonoLabel>
       </figcaption>
     </figure>

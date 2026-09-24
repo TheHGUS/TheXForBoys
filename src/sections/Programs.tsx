@@ -17,7 +17,22 @@ import { Flag } from '../components/Flag';
  */
 
 const PHOTOS = [AUTO_2, HOME_1, READ_2] as const;
-const ROTATIONS = ['rotate-[-2deg]', 'rotate-[1deg]', 'rotate-[-1deg]'] as const;
+
+/** Resting rotation. +/-1deg on mobile so nothing hangs outside the gutter. */
+const ROTATIONS = ['rotate-[-1deg] md:rotate-[-2deg]', 'rotate-[1deg]', 'rotate-[-1deg]'] as const;
+
+/** Hover straightens the object — desktop pointers only. */
+const HOVER_ROTATIONS = ['md:hover:rotate-0', 'md:hover:rotate-0', 'md:hover:rotate-0'] as const;
+
+/**
+ * Slightly different edge shadow per object, so three sheets of paper don't
+ * read as three identical white cards (ROUND-02 P2 #10).
+ */
+const SHADOWS = [
+  'shadow-[0_18px_38px_-16px_rgba(0,0,0,0.68)]',
+  'shadow-[0_22px_46px_-14px_rgba(0,0,0,0.72)]',
+  'shadow-[0_16px_34px_-18px_rgba(0,0,0,0.62)]',
+] as const;
 
 export function Programs() {
   const rootRef = useRef<HTMLElement>(null);
@@ -104,12 +119,18 @@ export function Programs() {
             aria-hidden="true"
           />
 
-          <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8 pt-6 no-scrollbar lg:grid lg:grid-cols-3 lg:gap-8 lg:overflow-visible lg:pb-0">
+          {/*
+            Below 768px the three objects stack full width inside the gutters.
+            Round 01 put them in a horizontal snap scroller, which clipped the
+            body copy and left an empty box with a "SWIPE" hint. Rotations are
+            capped at +/-1deg on mobile so nothing hangs outside the gutter.
+          */}
+          <div className="flex flex-col gap-8 md:grid md:grid-cols-3 md:gap-8">
             {programs.items.map((item, i) => (
               <div
                 key={item.id}
                 data-ticket
-                className={`group relative min-w-[84vw] shrink-0 snap-center sm:min-w-[62vw] lg:min-w-0 ${ROTATIONS[i]} transition-[transform,box-shadow] duration-300 ease-out hover:z-20 hover:-translate-y-2 hover:rotate-0 hover:shadow-[0_36px_70px_-18px_rgba(0,0,0,0.75)]`}
+                className={`group relative w-full ${ROTATIONS[i]} md:min-w-0 ${HOVER_ROTATIONS[i]} transition-[transform,box-shadow] duration-300 ease-out md:hover:z-20 md:hover:-translate-y-2 md:hover:rotate-0 ${SHADOWS[i]} md:hover:shadow-[0_36px_70px_-18px_rgba(0,0,0,0.75)]`}
                 style={{ willChange: 'transform' }}
               >
                 <Ticket item={item} index={i} />
@@ -117,11 +138,8 @@ export function Programs() {
             ))}
           </div>
 
-          <div className="relative mt-2">
-            <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-grey/75 lg:hidden">
-              Swipe →
-            </p>
-            <span className="hidden lg:block">
+          <div className="relative mt-2 hidden md:block">
+            <span>
               <Flag id="q-program-tickets" place="bl" />
             </span>
           </div>
@@ -162,6 +180,15 @@ function Ticket({ item, index }: { item: Item; index: number }) {
           isCard ? 'p-5 sm:p-6' : 'p-5 sm:p-6'
         }`}
       >
+        {/* paper: a faint fibre wash so the sheet reads as stock, not a card */}
+        <span
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(94deg, rgba(22,22,22,0.028) 0 1px, transparent 1px 3px), repeating-linear-gradient(4deg, rgba(22,22,22,0.02) 0 1px, transparent 1px 4px)',
+          }}
+          aria-hidden="true"
+        />
         {/* pin for the blueprint ticket */}
         {isBlueprint ? (
           <PushPin className="absolute -top-3 left-1/2 h-8 w-auto -translate-x-1/2 text-red" />

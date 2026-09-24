@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { gsap } from '../lib/gsap';
 import { drawOn } from '../lib/draw';
-import { LogoMark } from '../components/svg/LogoMark';
+import { LogoLockupSplit } from '../components/LogoImage';
 import { RoughXStrokes } from '../components/svg/Marker';
 import { XPattern } from '../components/XPattern';
 import { lockScroll, unlockScroll } from '../lib/scroll';
@@ -9,10 +9,13 @@ import { lockScroll, unlockScroll } from '../lib/scroll';
 /**
  * THE INTRO (first visit only, ~2.1s, skippable)
  *
- * Black screen. Two rough red marker strokes draw an X like someone writing on
- * a board. The strokes snap into the outlined varsity X, the shield slides up
- * behind it, the fist pops in with a short overshoot bounce — then the whole
- * mark shrinks into the nav logo position (FLIP) and the hero is revealed.
+ * Black screen. Two rough marker strokes draw the X. The strokes mask-wipe
+ * into the real logo PNG, and the fist region of that same PNG pops with a
+ * short overshoot — the fist layer is the identical image clipped to the fist,
+ * so nothing about the mark is ever redrawn by hand.
+ *
+ * Then the whole lockup flies into the nav logo position (FLIP) and the hero
+ * is revealed underneath.
  */
 
 export function Intro({
@@ -49,15 +52,18 @@ export function Intro({
       const strokeA = root.querySelector('.roughx-a');
       const strokeB = root.querySelector('.roughx-b');
       const strokesWrap = root.querySelector('.intro-strokes');
-      const xSvg = root.querySelector('.intro-x');
-      const shield = root.querySelector('.mark-shield-inner');
-      const fist = root.querySelector('.intro-fist');
+      const lockup = root.querySelector('.intro-lockup');
+      const baseWrap = root.querySelector('.logo-base-wrap');
+      const fist = root.querySelector('.logo-fist-wrap');
       const bg = root.querySelectorAll('.intro-bg');
       const tag = root.querySelector('.intro-tag');
 
-      gsap.set(xSvg, { opacity: 0, scale: 0.86, transformOrigin: '50% 50%' });
-      gsap.set(shield, { yPercent: 26, opacity: 0 });
-      gsap.set(fist, { scale: 0.2, opacity: 0, transformOrigin: '50% 40%' });
+      // The PNG starts hidden behind a clip-path that opens from the centre.
+      // The base image keeps its own fist cut-out underneath, so wiping the
+      // wrapper never reveals the fist early.
+      gsap.set(baseWrap, { clipPath: 'inset(50% 50% 50% 50%)' });
+      gsap.set(lockup, { opacity: 0 });
+      gsap.set(fist, { scale: 0.85, opacity: 0 });
       gsap.set(tag, { opacity: 0, y: 10 });
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -66,18 +72,22 @@ export function Intro({
       drawOn(tl, strokeA, { at: 0, duration: 0.34, ease: 'power1.inOut' });
       drawOn(tl, strokeB, { at: 0.2, duration: 0.34, ease: 'power1.inOut' });
 
-      // 2. snap into the varsity X
-      tl.to(strokesWrap, { opacity: 0, duration: 0.14, ease: 'power2.in' }, 0.6);
-      tl.to(xSvg, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.8)' }, 0.58);
+      /*
+       * 2. the strokes mask-wipe into the real logo.
+       * The PNG is revealed through an inset clip that opens from the middle
+       * outwards, so the hand-drawn X is replaced by the printed one rather
+       * than cross-fading into it.
+       */
+      tl.set(lockup, { opacity: 1 }, 0.56);
+      tl.to(baseWrap, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power3.inOut' }, 0.56);
+      tl.to(strokesWrap, { opacity: 0, duration: 0.24, ease: 'power2.in' }, 0.62);
 
-      // 3. shield slides up behind it
-      tl.to(shield, { yPercent: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }, 0.76);
-
-      // 4. fist pops in with a short overshoot bounce
-      tl.to(fist, { scale: 1, opacity: 1, duration: 0.42, ease: 'back.out(2.2)' }, 0.98);
+      // 3. the fist region pops, with a short overshoot
+      tl.to(fist, { opacity: 1, duration: 0.18, ease: 'none' }, 0.92);
+      tl.to(fist, { scale: 1, duration: 0.42, ease: 'back.out(2)' }, 0.92);
       tl.to(tag, { opacity: 1, y: 0, duration: 0.3 }, 1.12);
 
-      // 5. the hero starts revealing while the mark flies home
+      // 4. the hero starts revealing while the mark flies home
       tl.add(() => onReveal(), 1.34);
       tl.add(() => runFlip(0.62), 1.44);
 
@@ -122,13 +132,11 @@ export function Intro({
         if (!flipStarted) {
           tl.pause();
           gsap.set(strokesWrap, { opacity: 0 });
-          gsap.set(xSvg, { opacity: 1, scale: 1 });
-          gsap.set(shield, { yPercent: 0, opacity: 1 });
-          gsap.set(fist, { scale: 1, opacity: 1 });
+          gsap.set(lockup, { opacity: 1 });
+          gsap.set(baseWrap, { clipPath: 'inset(0% 0% 0% 0%)' });
+          gsap.set(fist, { opacity: 1, scale: 1 });
           gsap.set(tag, { opacity: 0 });
           runFlip(0.34);
-        } else {
-          gsap.globalTimeline.timeScale(1);
         }
       };
     }, root);
@@ -175,12 +183,9 @@ export function Intro({
           className="intro-strokes absolute inset-0 h-full w-full text-red"
           weight={7}
         />
-        <LogoMark
-          parts={['shield', 'x', 'fist']}
-          xVariant="solid"
-          fit="mark"
-          className="absolute inset-0 h-full w-full text-off"
-          partClassName={{ x: 'intro-x', fist: 'intro-fist' }}
+        <LogoLockupSplit
+          className="intro-lockup absolute inset-0 h-full w-full"
+          label="The X for Boys"
         />
       </div>
 

@@ -5,7 +5,7 @@ import { useReducedMotion } from '../lib/motion';
 import { albany } from '../content/copy';
 import { SECTION_ALBANY } from '../content/images';
 import { Img, MonoLabel } from '../components/ui';
-import { LogoMark } from '../components/svg/LogoMark';
+import { XGlyph } from '../components/svg/XGlyph';
 import { Flag } from '../components/Flag';
 
 /**
@@ -118,10 +118,8 @@ export function Albany() {
 
         {/* ---------------- hard cut ---------------- */}
         <div className="albany-cut mt-20 flex flex-col items-start gap-8 sm:mt-28 lg:flex-row lg:items-center lg:gap-14">
-          <LogoMark
-            parts={['x']}
-            xVariant="stroke"
-            fit="x"
+          <XGlyph
+            variant="stroke"
             className="albany-x h-[26vmin] w-auto shrink-0 text-red lg:h-[30vmin]"
           />
           <div className="relative">
