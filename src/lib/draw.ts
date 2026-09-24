@@ -75,18 +75,3 @@ export function playDraw(targets: DrawTarget, opts: DrawOpts = {}): gsap.core.Ti
   drawOn(tl, els, opts);
   return tl;
 }
-
-/** Wipe reveal: slides a cover away / an image in, transform only. */
-export function wipeIn(
-  tl: gsap.core.Timeline,
-  target: Element,
-  opts: { at?: gsap.Position; duration?: number; ease?: string; from?: number } = {},
-): void {
-  const { at = '+=0', duration = 0.9, ease = 'power3.inOut', from = -100 } = opts;
-  tl.fromTo(
-    target,
-    { xPercent: from },
-    { xPercent: 0, duration, ease },
-    at,
-  );
-}

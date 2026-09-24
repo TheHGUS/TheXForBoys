@@ -67,7 +67,6 @@ export const hero = {
     'Our mission is to provide our sons with new outlets to explore their unique interests & talents.', // [VERBATIM]
   primaryCta: 'Donate Now', // [VERBATIM]
   secondaryCta: 'See the programs', // [VERBATIM]
-  scrollHint: 'Scroll',
 } as const;
 
 export const equation = {
@@ -235,12 +234,4 @@ export const footer = {
     { label: 'Contact Us', href: links.contactUs },
     { label: 'Parent Portal', href: links.parentPortal },
   ],
-} as const;
-
-export const a11y = {
-  /** Alt / aria strings for non-photographic artwork. */
-  logoMark: 'The “X” for Boys: a varsity X with a raised fist on a home plate shield',
-  introSkip: 'Skip intro',
-  scrollProgress: 'Page scroll progress',
-  decorative: '',
 } as const;
