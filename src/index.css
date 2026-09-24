@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+   Base
+------------------------------------------------------------------ */
+@layer base {
+  :root {
+    --nav-h: 68px;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: auto; /* Lenis owns scrolling */
+  }
+
+  body {
+    @apply bg-ink font-sans text-off antialiased;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Sharp corners everywhere by default */
+  * {
+    border-radius: 0;
+  }
+
+  ::selection {
+    @apply bg-red text-white;
+  }
+
+  /* Visible red focus ring, keyboard only */
+  :focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid #f70303;
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-black uppercase tracking-tightest;
+    text-wrap: balance;
+  }
+
+  img {
+    display: block;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Utilities
+------------------------------------------------------------------ */
+@layer utilities {
+  /* Display type: huge, tight, Libre Franklin 900 */
+  .display {
+    @apply font-black uppercase leading-[0.84] tracking-tightest;
+  }
+
+  /* Fluid clamp helper: font-size: clamp(min, vw, max) */
+  .text-fluid-hero {
+    font-size: clamp(2.4rem, 11vw, 10.5rem);
+  }
+  .text-fluid-xl {
+    font-size: clamp(2rem, 7.2vw, 6rem);
+  }
+  .text-fluid-lg {
+    font-size: clamp(1.6rem, 4.4vw, 3.25rem);
+  }
+  .text-fluid-md {
+    font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  }
+
+  .shell {
+    @apply mx-auto w-full max-w-shell px-5 sm:px-8 lg:px-14;
+  }
+
+  /* Mask reveal wrapper: children animate inside */
+  .mask-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Duotone-ish red/black treatment for the Albany backdrop */
+  .albany-duotone {
+    filter: grayscale(1) contrast(1.25) brightness(0.42) sepia(1) hue-rotate(-32deg)
+      saturate(5.5);
+  }
+
+  .grabbing {
+    cursor: grabbing;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Reduced motion: kill every ambient loop / transform showpiece
+   (JS also reads prefers-reduced-motion and shows final states)
+------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
