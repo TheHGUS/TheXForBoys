@@ -362,4 +362,6 @@ Performance **70** · Accessibility **100** · Best practices 100 · SEO 100
 ### What I need from you
 1. Nav labels: "Connect" is short for the verbatim "Connect With Us!" — OK?
 2. The Albany background photo is still the fairground shot (round 03 Q2).
-3. Vercel is still not Git-connected; I redeployed by hand.
+3. ~~Vercel is not Git-connected~~ — done: the project is now connected to
+   TheHGUS/TheXForBoys, and every push to `main` deploys to
+   https://thexforboys.vercel.app (other branches get preview URLs).
