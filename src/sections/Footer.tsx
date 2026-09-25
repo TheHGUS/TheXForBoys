@@ -1,6 +1,7 @@
 import { connect, footer, site } from '../content/copy';
 import { LogoImage } from '../components/LogoImage';
 import { SocialIcon, type SocialId } from '../components/svg/Social';
+import { WithLogoX } from '../components/ui';
 import { Flag } from '../components/Flag';
 
 /**
@@ -18,8 +19,12 @@ export function Footer() {
             <span className="relative inline-flex items-center gap-4">
               <LogoImage label={`${site.shortName} logo`} className="h-14 w-auto sm:h-16" />
               <span>
-                <span className="block font-sans text-[1.2rem] font-semibold tracking-tighter">{site.name}</span>
-                <span className="block font-script text-[1.5rem] leading-none text-red">{site.tagline}</span>
+                <span className="block font-sans text-[1.2rem] font-bold tracking-tighter">
+                  <WithLogoX text={site.name} />
+                </span>
+                <span className="accent mt-1 block font-sans text-[1rem]">
+                  <WithLogoX text={site.tagline} />
+                </span>
               </span>
               <Flag id="q-logo-vector" place="bl" />
             </span>

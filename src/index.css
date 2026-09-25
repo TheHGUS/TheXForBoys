@@ -40,7 +40,7 @@
   h2,
   h3,
   h4 {
-    @apply font-sans font-medium tracking-tighter;
+    @apply font-sans font-bold tracking-tighter;
     text-wrap: balance;
   }
 
@@ -78,19 +78,27 @@
     backdrop-filter: blur(16px) saturate(1.3);
   }
 
-  /* Section titles: Libre Franklin 500, sentence case, tight but not heavy */
+  /* Section titles: Libre Franklin bold (700), sentence case — strong, not
+     chunky (no 800/900) */
   .display {
-    @apply font-sans font-medium leading-[1.02] tracking-tighter;
+    @apply font-sans font-bold leading-[1.04] tracking-tighter;
   }
 
-  /* The one accent word in a title: red jersey script, a touch larger so it
-     sits on the same x-height as the sans around it */
+  /* The accent word(s) in a title: the same typeface, italic, in red */
   .accent {
-    @apply font-script font-normal text-red;
-    font-size: 1.18em;
-    line-height: 0.8;
-    letter-spacing: 0;
-    padding: 0 0.04em;
+    @apply font-bold italic text-red;
+    padding-right: 0.04em;
+  }
+
+  /* The logo X standing in for the letter X in running text. The letter is
+     the bottom 87.9% of the image (the fist rises above it), so the image is
+     sized to make the letter one cap-height tall and sits on the baseline. */
+  .logo-x-inline {
+    display: inline-block;
+    height: 0.98em;
+    width: auto;
+    vertical-align: -0.07em;
+    margin: 0 0.02em;
   }
 
   /* Fluid clamp helper: font-size: clamp(min, vw, max) */

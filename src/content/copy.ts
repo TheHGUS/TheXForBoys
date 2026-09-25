@@ -124,7 +124,6 @@ export const albany = {
 
 export const girls = {
   title: 'Donate to The X for Boys & Girls', // [VERBATIM]
-  accent: 'Girls',
   cta: 'DONATE!', // [VERBATIM]
 } as const;
 

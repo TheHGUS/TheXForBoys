@@ -168,9 +168,9 @@ export function ClubPhotos() {
   }, [lightbox]);
 
   return (
-    <section id="gallery" className="relative overflow-hidden bg-ink py-14 text-white sm:py-20 lg:py-24" aria-labelledby="club-heading">
+    <section id="gallery" className="relative overflow-hidden bg-[#F4F4F2] py-14 text-ink sm:py-20 lg:py-24" aria-labelledby="club-heading">
       <div className="shell">
-        <h2 id="club-heading" className="display text-white" style={{ fontSize: 'clamp(2.1rem, 5vw, 4rem)' }}>
+        <h2 id="club-heading" className="display text-ink" style={{ fontSize: 'clamp(2.1rem, 5vw, 4rem)' }}>
           <Accented text={club.heading} accent="photos" />
         </h2>
       </div>
@@ -234,8 +234,8 @@ function Frame({
         className="group block w-full rounded-lg"
         aria-label={`Open photo ${index + 1}: ${image.alt}`}
       >
-        {/* the logo's keylines: off-white, then ink, then the photo */}
-        <ShieldFrame tone="light" className="transition-transform duration-300 ease-out group-hover:-translate-y-1">
+        {/* the logo's keylines: ink, then off-white, then the photo */}
+        <ShieldFrame tone="dark" className="transition-transform duration-300 ease-out group-hover:-translate-y-1">
           <Img
             image={image}
             className="h-full w-full bg-ink/10"

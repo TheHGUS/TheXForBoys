@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LogoImage } from '../components/LogoImage';
 import { SocialIcon, type SocialId } from '../components/svg/Social';
-import { Img } from '../components/ui';
+import { Img, WithLogoX } from '../components/ui';
 import { connect, nav, site } from '../content/copy';
 import { HERO_MAIN } from '../content/images';
 import { lockScroll, scrollToId, unlockScroll } from '../lib/scroll';
@@ -74,8 +74,8 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
       <span ref={logoRef as React.RefObject<HTMLSpanElement>} className="block">
         <LogoImage priority label="" className="h-9 w-auto sm:h-10" />
       </span>
-      <span className="whitespace-nowrap font-sans text-[1.02rem] font-semibold tracking-tighter text-white sm:text-[1.12rem]">
-        {site.name}
+      <span className="whitespace-nowrap font-sans text-[1.02rem] font-bold tracking-tighter text-white sm:text-[1.12rem]">
+        <WithLogoX text={site.name} />
       </span>
     </span>
   );
@@ -167,17 +167,17 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
             </button>
           </div>
 
-          <nav aria-label="Mobile" className="relative z-10 flex flex-1 flex-col justify-between overflow-y-auto px-5 pb-8 pt-6">
+          <nav aria-label="Mobile" className="relative z-10 flex flex-1 flex-col overflow-y-auto px-5 pb-8 pt-4">
             <ul>
               {nav.links.map((l) => (
                 <li key={l.label} className="border-b border-white/12">
                   <a
                     href={l.href}
                     onClick={go(l.href)}
-                    className="flex items-center justify-between py-4 font-sans text-[1.7rem] font-medium tracking-tighter text-white"
+                    className="flex items-center justify-between py-3.5 font-sans text-[1.1rem] font-semibold tracking-tighter text-white"
                   >
                     {l.label}
-                    <span className="text-white/40" aria-hidden="true">
+                    <span className="text-[0.9rem] text-white/40" aria-hidden="true">
                       →
                     </span>
                   </a>
@@ -185,16 +185,16 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
               ))}
             </ul>
 
-            <div className="mt-10">
+            <div className="mt-7">
               <a
                 href={nav.ctaHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block rounded-xl bg-red px-6 py-4 text-center font-sans text-[0.95rem] font-semibold text-white"
+                className="inline-flex rounded-lg bg-red px-6 py-3 font-sans text-[0.88rem] font-semibold text-white"
               >
                 {nav.cta}
               </a>
-              <p className="mt-8 font-sans text-[0.85rem] font-medium text-white/70">{connect.follow}</p>
+              <p className="mt-8 font-sans text-[0.82rem] font-medium text-white/70">{connect.follow}</p>
               <ul className="mt-3 flex gap-2">
                 {connect.socials.map((s) => (
                   <li key={s.id}>
@@ -203,9 +203,9 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${s.label} — ${s.handle}`}
-                      className="glass flex h-11 w-11 items-center justify-center rounded-full"
+                      className="glass flex h-9 w-9 items-center justify-center rounded-full"
                     >
-                      <SocialIcon id={s.id as SocialId} className="h-[18px] w-[18px]" />
+                      <SocialIcon id={s.id as SocialId} className="h-4 w-4" />
                     </a>
                   </li>
                 ))}

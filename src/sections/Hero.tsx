@@ -1,18 +1,18 @@
 import { HERO_MAIN } from '../content/images';
 import { hero, links } from '../content/copy';
-import { Accented, Img } from '../components/ui';
+import { Accented, Img, WithLogoX } from '../components/ui';
 import { scrollToId } from '../lib/scroll';
 
 /**
  * HERO
  * Their photograph, full bleed, with one bottom-up ink gradient behind the
  * copy. The headline is their own mission statement, set in Libre Franklin
- * at the weight they use, with one word in the red jersey script. The page
+ * bold, with one word in red italic. The page
  * opens on this finished frame — no entrance animation.
  */
 export function Hero() {
   return (
-    <section id="top" className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-ink">
+    <section id="top" className="relative h-[76svh] min-h-[500px] w-full overflow-hidden bg-ink sm:h-[80svh] lg:h-[88vh] lg:max-h-[860px] lg:min-h-[620px]">
       <div className="absolute inset-0">
         <Img image={HERO_MAIN} priority className="h-full w-full" imgClassName="h-full w-full object-cover" sizes="100vw" />
       </div>
@@ -32,19 +32,19 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 flex h-full flex-col justify-end pb-[9vh] pt-[68px]">
+      <div className="relative z-10 flex h-full flex-col justify-end pb-8 pt-[68px] sm:pb-12 lg:pb-16">
         <div className="shell">
-          <p className="font-script text-red" style={{ fontSize: 'clamp(1.7rem, 3vw, 2.6rem)', lineHeight: 1 }}>
-            {hero.eyebrow}
+          <p className="accent font-sans" style={{ fontSize: 'clamp(1.15rem, 1.8vw, 1.6rem)', lineHeight: 1.1 }}>
+            <WithLogoX text={hero.eyebrow} />
           </p>
           <h1
-            className="mt-3 max-w-[22ch] font-sans font-medium leading-[1.08] tracking-tighter text-white"
-            style={{ fontSize: 'clamp(1.85rem, 4.3vw, 4.1rem)' }}
+            className="mt-3 max-w-[22ch] font-sans font-bold leading-[1.08] tracking-tighter text-white"
+            style={{ fontSize: 'clamp(1.7rem, 4vw, 3.8rem)' }}
           >
             <Accented text={hero.headline} accent={hero.accent} />
           </h1>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3 sm:mt-10 sm:gap-4">
+          <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
             <a
               href={links.goGetFunding}
               target="_blank"

@@ -73,7 +73,8 @@ const html = {
   footer: renderToStaticMarkup(<Footer />),
 };
 const page = Object.values(html).join('\n');
-const text = page.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#x27;/g, "'");
+// the logo X stands in for the letter in running text — read it back as "X"
+const text = page.replace(/<img[^>]*logo-x-inline[^>]*>/g, 'X').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#x27;/g, "'");
 
 /* ------------------------------------------------------------------ */
 section('Copy — the client\'s own words, exactly');
@@ -103,7 +104,7 @@ section('Copy — the client\'s own words, exactly');
   const missing = VERBATIM.filter((v) => !flat.includes(v));
   check('every verbatim line renders exactly (accent styling never splits words)', missing.length === 0, missing.join(' | '));
 
-  const uses = (page.match(/Solving for X/g) ?? []).length;
+  const uses = (text.match(/Solving for X/g) ?? []).length;
   check('"Solving for X" appears in exactly two places', uses === 2, `${uses}`);
   const retired = ["Let's solve it together", 'Same equation. Every child', "That's the equation", 'You + ', 'Three workshops. One equation', 'Give via PayPal'];
   check('retired studio lines are gone', !retired.some((r) => allSrc.includes(r)), retired.filter((r) => allSrc.includes(r)).join(', '));
@@ -116,9 +117,14 @@ section('Brand — real logo, logo X, type');
   check('the logo is the self-hosted client PNG', page.includes('/brand/logo-white.png') && exists('public', 'brand', 'logo-white.png'));
   check('the X is the logo\'s own X (shield removed)', page.includes('/brand/logo-x.png') && exists('public', 'brand', 'logo-x.png'));
   check('no X is recreated in SVG', !exists('src', 'components', 'svg', 'XGlyph.tsx') && !/VarsityXShapes|XGlyph/.test(allSrc));
-  check('the brand name is in the header', html.nav.includes('The &quot;X&quot; for Boys'));
-  check('headings are medium weight, not black caps', /@apply font-sans font-medium/.test(readFileSync(join(SRC, 'index.css'), 'utf8')));
-  check('one script accent font is loaded', /family=Yellowtail/.test(indexHtml) && /class="accent/.test(page));
+  check('the brand name is in the header, with the logo X as its X', /The <img[^>]*logo-x-inline[^>]*> for Boys/.test(html.nav));
+  {
+    const plain = [...page.matchAll(/>([^<]*\bThe X\b[^<]*)</g)].map((m) => m[1]);
+    check('every X in headings/brand text is the logo X', plain.length === 0 && (page.match(/logo-x-inline/g) ?? []).length >= 5, plain.join(' | '));
+  }
+  const css = readFileSync(join(SRC, 'index.css'), 'utf8');
+  check('headings are bold (700), never black (900)', /@apply font-sans font-bold/.test(css) && !/font-black/.test(allSrc));
+  check('accents are italic, no script font', /\.accent \{\s*@apply font-bold italic text-red/.test(css) && !/Yellowtail|font-script/.test(allSrc + indexHtml) && /class="accent/.test(page));
   check('favicon is self-hosted', /href="\/favicon-32\.png"/.test(indexHtml));
 }
 
@@ -130,6 +136,8 @@ section('Clean design — no scribbles, no gloss, less motion');
   check('no intro, no film grain', !exists('src', 'sections', 'Intro.tsx') && !exists('src', 'components', 'Grain.tsx'));
   check('the programmes appear once (no Equation section)', !exists('src', 'sections', 'Equation.tsx') && (page.match(/Automotive Repair Workshops/g) ?? []).length === 1);
   check('program sheets have square corners', !/<article[^>]*rounded/.test(html.programs));
+  check('program sheets are tilted', (html.programs.match(/<article[^>]*rotate/g) ?? []).length === 3);
+  check('each sheet carries a red icon', (html.programs.match(/<svg[^>]*h-6 w-6 text-red/g) ?? []).length === 3);
   check('program sheets carry no blank lines', !/____/.test(html.programs) && !/DATE DUE|DATE:/.test(html.programs));
   check('no reading-card stamps', !/<Stamp\b|WEEKLY/.test(html.programs));
 }

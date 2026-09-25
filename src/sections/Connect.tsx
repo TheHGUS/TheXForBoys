@@ -13,13 +13,13 @@ export function Connect() {
   const [sent, setSent] = useState(false);
 
   return (
-    <section id="connect" className="relative bg-ink py-14 text-white sm:py-16" aria-labelledby="connect-heading">
+    <section id="connect" className="relative bg-white py-14 text-ink sm:py-16" aria-labelledby="connect-heading">
       <div className="shell grid items-center gap-7 lg:grid-cols-2 lg:gap-14">
         <div>
-          <h2 id="connect-heading" className="display text-white" style={{ fontSize: 'clamp(2rem, 4.4vw, 3.4rem)' }}>
+          <h2 id="connect-heading" className="display text-ink" style={{ fontSize: 'clamp(2rem, 4.4vw, 3.4rem)' }}>
             <Accented text={connect.heading} accent={connect.accent} />
           </h2>
-          <p className="mt-3 max-w-[46ch] text-[1.02rem] leading-[1.6] text-white/70">{connect.sub}</p>
+          <p className="mt-3 max-w-[46ch] text-[1.02rem] leading-[1.6] text-ink/70">{connect.sub}</p>
         </div>
 
         <div className="relative">
@@ -45,7 +45,7 @@ export function Connect() {
                   if (sent) setSent(false);
                 }}
                 placeholder={connect.emailPlaceholder}
-                className="glass h-[52px] w-full rounded-lg px-4 text-[0.95rem] text-white placeholder:text-white/55 focus:border-red focus:outline-none"
+                className="h-[52px] w-full rounded-lg border border-ink/15 bg-[#F4F4F2] px-4 text-[0.95rem] text-ink placeholder:text-ink/50 focus:border-red focus:outline-none"
               />
             </label>
             <button
@@ -55,7 +55,7 @@ export function Connect() {
               {connect.submit}
             </button>
           </form>
-          <p className="mt-3 min-h-[1.5em] text-[0.9rem] font-semibold text-white" aria-live="polite">
+          <p className="mt-3 min-h-[1.5em] text-[0.9rem] font-semibold text-ink" aria-live="polite">
             {sent ? connect.success : null}
           </p>
           <span className="absolute -top-2 right-0">

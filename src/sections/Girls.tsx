@@ -17,7 +17,7 @@ export function Girls() {
 
         <div>
           <h2 id="girls-title" className="display text-ink" style={{ fontSize: 'clamp(2rem, 4.6vw, 3.8rem)' }}>
-            <Accented text={girls.title} accent={girls.accent} accentClassName="!text-girls" />
+            <Accented text={girls.title} accent={['Boys', { text: 'Girls', className: '!text-girls' }]} tone="light" />
           </h2>
           <a
             href={links.goGetFunding}

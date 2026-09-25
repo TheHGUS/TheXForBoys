@@ -1,4 +1,5 @@
-import { forwardRef, type CSSProperties, type ReactNode } from 'react';
+import { forwardRef, Fragment, type CSSProperties, type ReactNode } from 'react';
+import { LogoX } from './LogoImage';
 import type { ImageAsset } from '../content/images';
 
 /* -------------------------------------------------------------------------- */
@@ -70,7 +71,7 @@ type Common = {
 };
 
 const BTN_BASE =
-  'group relative inline-flex items-center justify-center gap-2 rounded-xl border-2 px-6 py-3.5 font-black uppercase tracking-tightest transition-colors duration-200 text-[0.82rem] sm:text-[0.9rem] sm:px-8 sm:py-4';
+  'group relative inline-flex items-center justify-center gap-2 rounded-lg border-2 px-6 py-3.5 font-sans font-semibold tracking-tighter transition-colors duration-200 text-[0.82rem] sm:text-[0.9rem] sm:px-8 sm:py-4';
 
 export const Btn = forwardRef<
   HTMLAnchorElement | HTMLButtonElement,
@@ -163,31 +164,78 @@ export function SrOnly({ children }: { children: ReactNode }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Titles with one script accent word                                         */
+/*  Their words, with the logo X and an italic accent                          */
 /* -------------------------------------------------------------------------- */
 
+type Tone = 'dark' | 'light';
+
 /**
- * Renders the client's text exactly as written, with ONE word (or phrase)
- * set in the red jersey script. Only the styling changes — never the words.
+ * Every standalone "X" in their copy (including the quoted "X" in the
+ * organisation's name) is drawn as the X from their logo — the real pixels,
+ * shield removed — sized to sit on the text's baseline like a capital.
+ * On light backgrounds the mark is shown in negative (ink fill) so its white
+ * fill doesn't disappear.
+ */
+export function WithLogoX({ text, tone = 'dark' }: { text: string; tone?: Tone }) {
+  const parts = text.split(/("X"|\bX\b)/);
+  if (parts.length === 1) return <>{text}</>;
+  return (
+    <>
+      {parts.map((p, i) =>
+        p === 'X' || p === '"X"' ? (
+          <LogoX
+            key={i}
+            label="X"
+            className={`logo-x-inline ${tone === 'light' ? 'invert' : ''}`}
+          />
+        ) : (
+          <Fragment key={i}>{p}</Fragment>
+        ),
+      )}
+    </>
+  );
+}
+
+/**
+ * Renders the client's text exactly as written, with one or more words set
+ * as the accent: the same typeface, italic, in red (or the colour passed).
+ * Only the styling changes — never the words.
  */
 export function Accented({
   text,
   accent,
   accentClassName,
+  tone = 'dark',
 }: {
   text: string;
-  accent?: string;
+  accent?: string | ReadonlyArray<string | { text: string; className?: string }>;
   accentClassName?: string;
+  tone?: Tone;
 }) {
-  const at = accent ? text.lastIndexOf(accent) : -1;
-  if (!accent || at < 0) return <>{text}</>;
-  return (
-    <>
-      {text.slice(0, at)}
-      <span className={`accent ${accentClassName ?? ''}`}>{accent}</span>
-      {text.slice(at + accent.length)}
-    </>
+  const list = (accent == null ? [] : typeof accent === 'string' ? [accent] : accent).map((a) =>
+    typeof a === 'string' ? { text: a, className: accentClassName } : a,
   );
+  // walk the text, cutting out each accent in order of appearance
+  const out: ReactNode[] = [];
+  let rest = text;
+  let key = 0;
+  const found = list
+    .map((a) => ({ ...a, at: text.lastIndexOf(a.text) }))
+    .filter((a) => a.at >= 0)
+    .sort((a, b) => a.at - b.at);
+  let cursor = 0;
+  for (const a of found) {
+    out.push(<WithLogoX key={key++} text={text.slice(cursor, a.at)} tone={tone} />);
+    out.push(
+      <span key={key++} className={`accent ${a.className ?? ''}`}>
+        <WithLogoX text={a.text} tone={tone} />
+      </span>,
+    );
+    cursor = a.at + a.text.length;
+  }
+  rest = text.slice(cursor);
+  out.push(<WithLogoX key={key++} text={rest} tone={tone} />);
+  return <>{out}</>;
 }
 
 /** Small arrow for links that leave the site. */

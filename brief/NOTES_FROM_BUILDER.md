@@ -429,3 +429,34 @@ old line art (`preview-art`, `checks/geometry`).
 1. Keep "Solving for X" in those two places, or drop it entirely?
 2. Still open: the real PayPal link, the email destination, and an actual
    Albany street or skyline photo.
+
+---
+
+## Round 06 — logo X in the words, italic accents, Help rebuilt (Claude Code)
+
+**Preview:** https://thexforboys.vercel.app · `npm run check` 38/38 ·
+screens in `brief/screens/round-06/`.
+
+- **The logo X replaces the letter X in text:** the header's "The X for Boys"
+  (quotes dropped around the mark), "Solving for X" (hero and footer),
+  "Donate to The X", "Donate to The X for Boys & Girls". `WithLogoX` in
+  `ui.tsx` does this: it sits on the baseline at cap height, with the fist
+  rising above, and shows in negative on white backgrounds. The copyright line
+  stays plain text (legal line, 11px).
+- **No script font.** Accent words are the same Libre Franklin, **bold
+  italic, in red** (pink for "Girls"). "Boys" and "Girls" are both
+  accented.
+- **Headings are bold (700)**, never black (900). The hero headline is bold too.
+- **Program sheets tilted again** (±1–2°, ±1° on phones, straighten on
+  hover), each with a small red icon at the top: wrench, house, open book.
+- **How You Can Help rebuilt** on the round-04 look (ink warming to deep red,
+  glass cards) with hierarchy: a featured DONATE card (their boys at the
+  truck, the GoGetFunding mark, their Life Prep line, the main button), and
+  GIVE and Registries & Wishlists as secondary cards with the PayPal and
+  Amazon marks on white chips. The logo X is a faint watermark.
+- **Mobile menu** scaled down to normal sizes (18px links, a standard Donate
+  button, 36px social icons).
+- **Hero height:** 76% of the screen on phones (the next section peeks in);
+  88vh capped at 860px on desktop.
+- Backgrounds rebalanced so no more than one dark band appears in a row: the
+  gallery is light again, and Connect is white.

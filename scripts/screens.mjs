@@ -18,7 +18,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 
-const OUT = process.env.SCREENS_OUT ?? 'brief/screens/round-05';
+const OUT = process.env.SCREENS_OUT ?? 'brief/screens/round-06';
 const PORT = 4179;
 const SITE = `http://localhost:${PORT}/`;
 const only = process.argv.find((a) => a.startsWith('--only='))?.split('=')[1];
