@@ -105,7 +105,7 @@ section('Copy — the client\'s own words, exactly');
   check('every verbatim line renders exactly (accent styling never splits words)', missing.length === 0, missing.join(' | '));
 
   const uses = (text.match(/Solving for X/g) ?? []).length;
-  check('"Solving for X" appears in exactly two places', uses === 2, `${uses}`);
+  check('"Solving for X" appears once (hero only)', uses === 1, `${uses}`);
   const retired = ["Let's solve it together", 'Same equation. Every child', "That's the equation", 'You + ', 'Three workshops. One equation', 'Give via PayPal'];
   check('retired studio lines are gone', !retired.some((r) => allSrc.includes(r)), retired.filter((r) => allSrc.includes(r)).join(', '));
   check('nav uses their own labels', ['Home', 'Learn More', 'Support Us', 'Gallery'].every((l) => copy.nav.links.some((n) => n.label === l)));
@@ -117,10 +117,12 @@ section('Brand — real logo, logo X, type');
   check('the logo is the self-hosted client PNG', page.includes('/brand/logo-white.png') && exists('public', 'brand', 'logo-white.png'));
   check('the X is the logo\'s own X (shield removed)', page.includes('/brand/logo-x.png') && exists('public', 'brand', 'logo-x.png'));
   check('no X is recreated in SVG', !exists('src', 'components', 'svg', 'XGlyph.tsx') && !/VarsityXShapes|XGlyph/.test(allSrc));
+  check('the X inside a red accent is the red logo X', /Donate to <span class="accent[^"]*">The <img[^>]*logo-x-red\.png/.test(html.albany));
+  check('the footer name uses a plain X and no tagline', html.footer.includes('The &quot;X&quot; for Boys') && !/Solving for/.test(html.footer));
   check('the header reads "The <logo> for Boys" with the full logo as the X', /<span>The<\/span><span[^>]*><img[^>]*logo-white\.png[^>]*><\/span><span>for Boys<\/span>/.test(html.nav));
   {
     const plain = [...page.matchAll(/>([^<]*\bThe X\b[^<]*)</g)].map((m) => m[1]);
-    check('every X in headings/brand text is the logo X', plain.length === 0 && (page.match(/logo-x-inline/g) ?? []).length >= 4, plain.join(' | '));
+    check('every X in headings/brand text is the logo X', plain.length === 0 && (page.match(/logo-x-inline/g) ?? []).length >= 3, plain.join(' | '));
   }
   const css = readFileSync(join(SRC, 'index.css'), 'utf8');
   check('headings are bold (700), never black (900)', /@apply font-sans font-bold/.test(css) && !/font-black/.test(allSrc));

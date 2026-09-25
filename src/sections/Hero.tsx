@@ -35,7 +35,7 @@ export function Hero() {
       <div className="relative z-10 flex h-full flex-col justify-end pb-8 pt-[68px] sm:pb-12 lg:pb-16">
         <div className="shell">
           <p className="accent font-sans drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]" style={{ fontSize: 'clamp(1.4rem, 2.2vw, 2rem)', lineHeight: 1.1 }}>
-            <WithLogoX text={hero.eyebrow} />
+            <WithLogoX text={hero.eyebrow} red />
           </p>
           <h1
             className="mt-3 max-w-[22ch] font-sans font-bold leading-[1.08] tracking-tighter text-white"

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { LOGO_PNG, LOGO_INTRINSIC, LOGO_X, LOGO_X_INTRINSIC } from '../content/images';
+import { LOGO_PNG, LOGO_INTRINSIC, LOGO_X, LOGO_X_INTRINSIC, LOGO_X_RED } from '../content/images';
 
 /**
  * THE REAL LOGO.
@@ -155,10 +155,10 @@ export function sealLogo(tl: gsap.core.Timeline, root: Element, at: number): voi
  * The X from the logo, without the shield — the client's own pixels, cut out
  * by scripts/cut-logo-x.mjs. Give it a height; the width follows.
  */
-export function LogoX({ className, style, label = '', priority = false }: LogoProps) {
+export function LogoX({ className, style, label = '', priority = false, red = false }: LogoProps & { red?: boolean }) {
   return (
     <img
-      src={LOGO_X}
+      src={red ? LOGO_X_RED : LOGO_X}
       alt={label}
       aria-hidden={label ? undefined : true}
       width={LOGO_X_INTRINSIC.w}

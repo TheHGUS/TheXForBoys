@@ -174,9 +174,10 @@ type Tone = 'dark' | 'light';
  * organisation's name) is drawn as the X from their logo — the real pixels,
  * shield removed — sized to sit on the text's baseline like a capital.
  * On light backgrounds the mark is shown in negative (ink fill) so its white
- * fill doesn't disappear.
+ * fill doesn't disappear. Inside a red accent it uses the red version, so the
+ * accent colour carries through the mark.
  */
-export function WithLogoX({ text, tone = 'dark' }: { text: string; tone?: Tone }) {
+export function WithLogoX({ text, tone = 'dark', red = false }: { text: string; tone?: Tone; red?: boolean }) {
   const parts = text.split(/("X"|\bX\b)/);
   if (parts.length === 1) return <>{text}</>;
   return (
@@ -186,7 +187,8 @@ export function WithLogoX({ text, tone = 'dark' }: { text: string; tone?: Tone }
           <LogoX
             key={i}
             label="X"
-            className={`logo-x-inline ${tone === 'light' ? 'invert' : ''}`}
+            red={red}
+            className={`logo-x-inline ${tone === 'light' && !red ? 'invert' : ''}`}
           />
         ) : (
           <Fragment key={i}>{p}</Fragment>
@@ -228,7 +230,8 @@ export function Accented({
     out.push(<WithLogoX key={key++} text={text.slice(cursor, a.at)} tone={tone} />);
     out.push(
       <span key={key++} className={`accent ${a.className ?? ''}`}>
-        <WithLogoX text={a.text} tone={tone} />
+        {/* the accent colour carries through to the logo X */}
+        <WithLogoX text={a.text} tone={tone} red />
       </span>,
     );
     cursor = a.at + a.text.length;

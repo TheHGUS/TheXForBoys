@@ -67,6 +67,8 @@ export const LOGO_INTRINSIC = { w: 365, h: 418 } as const;
  */
 export const LOGO_X = '/brand/logo-x.png';
 export const LOGO_X_TILE = '/brand/logo-x-tile.png';
+/** The same X with its white fill in brand red — for X's inside red accent words. */
+export const LOGO_X_RED = '/brand/logo-x-red.png';
 export const LOGO_X_INTRINSIC = { w: 365, h: 372 } as const;
 /** Fraction of the image height taken by the letter X (below the fist). */
 export const LOGO_X_LETTER = 0.879;

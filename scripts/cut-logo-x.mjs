@@ -84,5 +84,21 @@ await sharp({ create: { width: 160, height: 160, channels: 4, background: { r: 0
   .composite([{ input: small, gravity: 'center' }])
   .png({ compressionLevel: 9 })
   .toFile('public/brand/logo-x-tile.png');
+// red version for accented words: the white fill becomes brand red
+// (#F70303); the black keylines stay black; anti-aliased greys blend
+{
+  const { data: px, info: pi } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const red = Buffer.from(px);
+  for (let i = 0; i < pi.width * pi.height; i++) {
+    const o = i * pi.channels;
+    const l = (px[o] + px[o + 1] + px[o + 2]) / 765; // 0 = black, 1 = white
+    red[o] = Math.round(0xf7 * l);
+    red[o + 1] = Math.round(0x03 * l);
+    red[o + 2] = Math.round(0x03 * l);
+  }
+  await sharp(red, { raw: { width: pi.width, height: pi.height, channels: pi.channels } })
+    .png({ compressionLevel: 9 })
+    .toFile('public/brand/logo-x-red.png');
+}
 const m = await sharp('public/brand/logo-x.png').metadata();
 console.log(`  logo-x.png ${m.width}×${m.height}`);

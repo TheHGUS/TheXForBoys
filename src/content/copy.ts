@@ -14,7 +14,6 @@
 export const site = {
   name: 'The "X" for Boys', // [VERBATIM] as in their copyright line
   shortName: 'The X for Boys',
-  tagline: 'Solving for X', // [NEW] — studio line, use #2 of 2
   credit: 'Designed by The Harmon Group',
   copyright: 'Copyright © 2026 The "X" for Boys - All Rights Reserved.', // [VERBATIM]
 } as const;
@@ -67,7 +66,7 @@ export const nav = {
 } as const;
 
 export const hero = {
-  eyebrow: 'Solving for X', // [NEW] — studio line, use #1 of 2
+  eyebrow: 'Solving for X', // [NEW] — the only studio line on the page
   /** [VERBATIM] their mission — the hero headline. `accent` is styled in script. */
   headline: 'Our mission is to provide our sons with new outlets to explore their unique interests & talents.',
   accent: 'sons',
