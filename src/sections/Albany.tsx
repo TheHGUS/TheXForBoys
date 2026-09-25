@@ -91,7 +91,7 @@ export function Albany() {
         {/* ---------------- 1. the problem ---------------- */}
         <p
           id="albany-statement"
-          className="albany-statement max-w-[24ch] font-sans font-medium leading-[1.14] tracking-tighter text-white sm:max-w-[28ch] lg:max-w-[32ch]"
+          className="albany-statement max-w-[24ch] font-sans font-bold leading-[1.14] tracking-tighter text-white sm:max-w-[28ch] lg:max-w-[32ch]"
           style={{ fontSize: 'clamp(1.45rem, 3.6vw, 3rem)' }}
         >
           {words.map((w, i) => (

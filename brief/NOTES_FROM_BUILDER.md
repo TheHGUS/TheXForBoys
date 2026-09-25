@@ -460,3 +460,16 @@ screens in `brief/screens/round-06/`.
   88vh capped at 860px on desktop.
 - Backgrounds rebalanced so no more than one dark band appears in a row: the
   gallery is light again, and Connect is white.
+
+### Round 06 follow-ups
+- Header reads **"The <logo> for Boys"**: the full logo at full header size
+  (36–40px) stands in for the X, with the words either side.
+- Hero: a stronger bottom gradient, and "Solving for X" is larger with a soft
+  shadow, so it reads clearly.
+- Program icons now sit beside each title.
+- The Albany statement is bold.
+- Gallery heading reads **#ClubPhotos** (client's request; their site has
+  "#clubphotos").
+- Thin red outline around each program photo; thin pink outline (their
+  shirts' pink) around the girls' photo in "Donate to The X for Boys & Girls".
+  None of the program photos show the girls, so the pink went there.

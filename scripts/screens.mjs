@@ -96,7 +96,7 @@ for (const vp of VIEWPORTS) {
 
   /* the gallery must move on its own */
   {
-    const strip = page.locator('[aria-label^="#clubphotos"]').first();
+    const strip = page.locator('#gallery [role="region"]').first();
     await strip.scrollIntoViewIfNeeded();
     await page.mouse.move(2, 2);
     await wait(600);

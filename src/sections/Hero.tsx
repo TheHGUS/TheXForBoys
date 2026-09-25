@@ -24,17 +24,17 @@ export function Hero() {
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[72%]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[80%]"
         style={{
           background:
-            'linear-gradient(to top, rgba(22,22,22,0.96) 0%, rgba(22,22,22,0.82) 34%, rgba(22,22,22,0.35) 66%, rgba(22,22,22,0) 100%)',
+            'linear-gradient(to top, rgba(22,22,22,0.98) 0%, rgba(22,22,22,0.9) 38%, rgba(22,22,22,0.6) 62%, rgba(22,22,22,0.15) 88%, rgba(22,22,22,0) 100%)',
         }}
         aria-hidden="true"
       />
 
       <div className="relative z-10 flex h-full flex-col justify-end pb-8 pt-[68px] sm:pb-12 lg:pb-16">
         <div className="shell">
-          <p className="accent font-sans" style={{ fontSize: 'clamp(1.15rem, 1.8vw, 1.6rem)', lineHeight: 1.1 }}>
+          <p className="accent font-sans drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]" style={{ fontSize: 'clamp(1.4rem, 2.2vw, 2rem)', lineHeight: 1.1 }}>
             <WithLogoX text={hero.eyebrow} />
           </p>
           <h1

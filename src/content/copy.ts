@@ -128,7 +128,7 @@ export const girls = {
 } as const;
 
 export const club = {
-  heading: '#clubphotos', // [VERBATIM]
+  heading: '#ClubPhotos', // their #clubphotos, capitalised at the client's request
   lightboxClose: 'Close',
   lightboxPrev: 'Previous photo',
   lightboxNext: 'Next photo',

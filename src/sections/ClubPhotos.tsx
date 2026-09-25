@@ -171,7 +171,7 @@ export function ClubPhotos() {
     <section id="gallery" className="relative overflow-hidden bg-[#F4F4F2] py-14 text-ink sm:py-20 lg:py-24" aria-labelledby="club-heading">
       <div className="shell">
         <h2 id="club-heading" className="display text-ink" style={{ fontSize: 'clamp(2.1rem, 5vw, 4rem)' }}>
-          <Accented text={club.heading} accent="photos" />
+          <Accented text={club.heading} accent="Photos" />
         </h2>
       </div>
 

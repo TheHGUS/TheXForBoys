@@ -117,10 +117,10 @@ section('Brand — real logo, logo X, type');
   check('the logo is the self-hosted client PNG', page.includes('/brand/logo-white.png') && exists('public', 'brand', 'logo-white.png'));
   check('the X is the logo\'s own X (shield removed)', page.includes('/brand/logo-x.png') && exists('public', 'brand', 'logo-x.png'));
   check('no X is recreated in SVG', !exists('src', 'components', 'svg', 'XGlyph.tsx') && !/VarsityXShapes|XGlyph/.test(allSrc));
-  check('the brand name is in the header, with the logo X as its X', /The <img[^>]*logo-x-inline[^>]*> for Boys/.test(html.nav));
+  check('the header reads "The <logo> for Boys" with the full logo as the X', /<span>The<\/span><span[^>]*><img[^>]*logo-white\.png[^>]*><\/span><span>for Boys<\/span>/.test(html.nav));
   {
     const plain = [...page.matchAll(/>([^<]*\bThe X\b[^<]*)</g)].map((m) => m[1]);
-    check('every X in headings/brand text is the logo X', plain.length === 0 && (page.match(/logo-x-inline/g) ?? []).length >= 5, plain.join(' | '));
+    check('every X in headings/brand text is the logo X', plain.length === 0 && (page.match(/logo-x-inline/g) ?? []).length >= 4, plain.join(' | '));
   }
   const css = readFileSync(join(SRC, 'index.css'), 'utf8');
   check('headings are bold (700), never black (900)', /@apply font-sans font-bold/.test(css) && !/font-black/.test(allSrc));

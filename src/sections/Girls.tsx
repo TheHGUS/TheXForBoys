@@ -11,7 +11,8 @@ export function Girls() {
   return (
     <section className="relative bg-white py-14 sm:py-20 lg:py-28" aria-labelledby="girls-title">
       <div className="shell grid items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-16">
-        <div className="overflow-hidden rounded-2xl">
+        {/* thin pink outline, in the pink of their shirts */}
+        <div className="overflow-hidden rounded-2xl ring-1 ring-girls ring-offset-4 ring-offset-white">
           <Img image={GIRLS_HERO} className="aspect-[4/3] w-full" imgClassName="h-full w-full object-cover" sizes="(min-width: 1024px) 45vw, 100vw" />
         </div>
 

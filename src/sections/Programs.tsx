@@ -81,10 +81,12 @@ function Receipt({ item, index }: { item: Item; index: number }) {
       </header>
 
       <div className="flex flex-1 flex-col px-5 pb-6 pt-5 sm:px-6">
-        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-red/[0.08]">
-          <ProgramIcon id={item.id} />
-        </span>
-        <h3 className="mt-4 font-sans text-[1.35rem] font-bold leading-[1.15] tracking-tighter text-ink">{item.title}</h3>
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red/[0.08]">
+            <ProgramIcon id={item.id} />
+          </span>
+          <h3 className="font-sans text-[1.35rem] font-bold leading-[1.15] tracking-tighter text-ink">{item.title}</h3>
+        </div>
         <p className="mt-3 text-[0.95rem] leading-[1.6] text-ink/75">{item.body}</p>
 
         {/* line items — their own words */}
@@ -102,7 +104,8 @@ function Receipt({ item, index }: { item: Item; index: number }) {
         {/* the photo, printed on the sheet (pushed to the bottom so the
             three sheets' photos line up) */}
         <div className="mt-auto pt-6">
-          <div className="overflow-hidden">
+          {/* thin red outline around the photo */}
+          <div className="overflow-hidden ring-1 ring-red ring-offset-2 ring-offset-white">
             <Img
               image={photo}
               className="aspect-[4/3] w-full"

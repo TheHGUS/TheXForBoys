@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LogoImage } from '../components/LogoImage';
 import { SocialIcon, type SocialId } from '../components/svg/Social';
-import { Img, WithLogoX } from '../components/ui';
+import { Img } from '../components/ui';
 import { connect, nav, site } from '../content/copy';
 import { HERO_MAIN } from '../content/images';
 import { lockScroll, scrollToId, unlockScroll } from '../lib/scroll';
@@ -69,14 +69,14 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
     requestAnimationFrame(() => requestAnimationFrame(() => scrollToId(href)));
   };
 
+  // "The <logo> for Boys": the full logo, at full header size, is the X
   const brand = (
-    <span className="flex items-center gap-3">
+    <span className="flex items-center gap-2 whitespace-nowrap font-sans text-[1.02rem] font-bold tracking-tighter text-white sm:text-[1.12rem]">
+      <span>The</span>
       <span ref={logoRef as React.RefObject<HTMLSpanElement>} className="block">
-        <LogoImage priority label="" className="h-9 w-auto sm:h-10" />
+        <LogoImage priority label="X" className="h-9 w-auto sm:h-10" />
       </span>
-      <span className="whitespace-nowrap font-sans text-[1.02rem] font-bold tracking-tighter text-white sm:text-[1.12rem]">
-        <WithLogoX text={site.name} />
-      </span>
+      <span>for Boys</span>
     </span>
   );
 
