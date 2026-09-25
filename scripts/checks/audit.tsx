@@ -1,24 +1,28 @@
 /**
- * Round-02 static audit (dev only — not part of the shipped bundle).
+ * Static audit (dev only — not part of the shipped bundle).
  *
- * No browser is available in every environment, so this renders the real
- * components with renderToStaticMarkup and asserts against the markup they
- * actually produce: brand rules, the ROUND-02 P0 acceptance criteria that are
- * checkable without layout, and "no hand-drawn logo parts remain".
+ * Renders the real components with renderToStaticMarkup and asserts the rules
+ * the site currently lives by (round 05): the client's verbatim copy, the
+ * real logo and logo X, self-hosted assets, brand logos on the giving
+ * options, clean CTAs, no marker scribbles, menus that only point at this
+ * page, and the accessibility basics.
  *
  * Run with: npm run check
  */
 import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { createRef } from 'react';
 import App from '../../src/App';
-import { Help } from '../../src/sections/Help';
-import { Programs } from '../../src/sections/Programs';
-import { Equation } from '../../src/sections/Equation';
 import { Hero } from '../../src/sections/Hero';
+import { Programs } from '../../src/sections/Programs';
+import { Albany } from '../../src/sections/Albany';
+import { Girls } from '../../src/sections/Girls';
+import { Help } from '../../src/sections/Help';
+import { Connect } from '../../src/sections/Connect';
 import { Footer } from '../../src/sections/Footer';
 import { Nav } from '../../src/sections/Nav';
-import { createRef } from 'react';
+import * as copy from '../../src/content/copy';
 
 let pass = 0;
 let fail = 0;
@@ -34,12 +38,8 @@ function check(name: string, ok: boolean, detail = '') {
     console.log(`  FAIL ${name}${detail ? ` — ${detail}` : ''}`);
   }
 }
+const section = (t: string) => console.log(`\n${t}`);
 
-function section(title: string) {
-  console.log(`\n${title}`);
-}
-
-/** Walk the source tree. */
 function walk(dir: string, out: string[] = []): string[] {
   for (const e of readdirSync(dir)) {
     const p = join(dir, e);
@@ -48,214 +48,134 @@ function walk(dir: string, out: string[] = []): string[] {
   }
   return out;
 }
+const exists = (...p: string[]) => {
+  try {
+    statSync(join(process.cwd(), ...p));
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const SRC = join(process.cwd(), 'src');
 const files = walk(SRC);
-const sources = new Map(files.map((f) => [f, readFileSync(f, 'utf8')]));
-const allSrc = [...sources.values()].join('\n');
+const allSrc = files.map((f) => readFileSync(f, 'utf8')).join('\n');
+const indexHtml = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+
+const html = {
+  nav: renderToStaticMarkup(<Nav logoRef={createRef<HTMLSpanElement>()} />),
+  hero: renderToStaticMarkup(<Hero />),
+  programs: renderToStaticMarkup(<Programs />),
+  albany: renderToStaticMarkup(<Albany />),
+  girls: renderToStaticMarkup(<Girls />),
+  help: renderToStaticMarkup(<Help />),
+  connect: renderToStaticMarkup(<Connect />),
+  footer: renderToStaticMarkup(<Footer />),
+};
+const page = Object.values(html).join('\n');
+const text = page.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#x27;/g, "'");
 
 /* ------------------------------------------------------------------ */
-section('ROUND-02 P0 #2 — the logo is never redrawn');
-
-check(
-  'no hand-drawn fist geometry remains',
-  !/FIST_BODY|FIST_THUMB|FIST_WRIST_D|FIST_SEAMS|FistShapes|fistGap/.test(allSrc),
-);
-check(
-  'no hand-drawn shield path remains',
-  !/M8 40 H132 V112 L70 150 L8 112 Z|SHIELD_GAP|mark-shield/.test(allSrc),
-);
-check(
-  'the old LogoMark component is gone',
-  !files.some((f) => f.endsWith('LogoMark.tsx')) && !/from ['"].*LogoMark['"]/.test(allSrc),
-);
-check(
-  'every full-logo moment renders the real PNG',
-  (() => {
-    const html = [Nav, Help, Equation, Footer]
-      .map((C) => (C === Nav ? renderToStaticMarkup(<Nav logoRef={createRef<HTMLSpanElement>()} />) : renderToStaticMarkup(<C />)))
-      .join('');
-    // round 03: the client's PNG, trimmed and self-hosted (scripts/build-assets.mjs)
-    return html.includes('/brand/logo-white.png');
-  })(),
-);
-check(
-  'no X is recreated in SVG at all (round 04: the logo X is used)',
-  !/XGlyph|VarsityXShapes/.test(allSrc) && !/parts=\{\['shield'/.test(allSrc),
-);
-
-/* ------------------------------------------------------------------ */
-section('ROUND-02 P0 #3 — the equation');
-
-const eqHtml = renderToStaticMarkup(<Equation />);
-
-check('equation band and illustration stage are separate zones', /lg:h-\[30%\]/.test(eqHtml) && /lg:h-\[70%\]/.test(eqHtml));
-check('terms that have not arrived show an outlined placeholder', (eqHtml.match(/data-ph=/g) ?? []).length >= 3);
-check('the placeholder is a faint grey outline, not a solid block', /border-dashed border-grey\/35/.test(eqHtml));
-check('each term carries a multi-stroke scrawl', (() => {
-  const blocks = eqHtml.split('data-scribble=').length - 1;
-  const paths = (eqHtml.match(/scribble-path/g) ?? []).length;
-  return blocks >= 3 && paths >= blocks * 2; // 2+ strokes each
-})());
-check('exactly one X in the equation row (no duplicate at the finale)', (() => {
-  // data-result = the desktop row's X; data-result-mobile = the mobile finale's.
-  // They live in mutually exclusive breakpoints (lg:flex vs lg:hidden), so
-  // only one is ever on screen.
-  const rowX = (eqHtml.match(/data-result(?![-\w])/g) ?? []).length;
-  const mobileX = (eqHtml.match(/data-result-mobile/g) ?? []).length;
-  return rowX === 1 && mobileX === 1;
-})());
-check('the finale is the real logo PNG', /finale-mark/.test(eqHtml) && eqHtml.includes('logo-base-wrap'));
-check('the finale exposes a base wrap and a fist layer for the pop', /logo-base-wrap/.test(eqHtml) && /logo-fist-wrap/.test(eqHtml));
-
-/* ------------------------------------------------------------------ */
-section('ROUND-02 P0 #5 + P2 #10 — the programmes');
-
-const progHtml = renderToStaticMarkup(<Programs />);
-check('no horizontal snap scroller left on mobile', !/snap-x snap-mandatory/.test(progHtml));
-check('stacks below 768px, grid from md up', /flex flex-col gap-6 md:grid md:grid-cols-3/.test(progHtml));
-check('resting rotation capped at 1deg on mobile', /rotate-\[-1deg\] md:rotate-\[-2deg\]/.test(progHtml));
-check('each object carries its own edge shadow', (progHtml.match(/shadow-\[0_/g) ?? []).length >= 3);
-check('paper texture applied to the sheets', /repeating-linear-gradient/.test(progHtml));
-
-/* ------------------------------------------------------------------ */
-section('ROUND-02 P0 #1 + P1 #6/#7 — hero and help');
-
-const heroHtml = renderToStaticMarkup(<Hero />);
-check('the h1 carries the fluid display size', /class="display text-fluid-hero/.test(heroHtml));
-check('the hero X is the logo X (round 04)', heroHtml.includes('/brand/logo-x.png'));
-check('hero photo is not covered by a full-frame wash', !/inset-0 bg-gradient-to-t from-ink via-ink\/40/.test(heroHtml));
-check('the only hero darkening is a bottom-up gradient', /linear-gradient\(to top, #161616/.test(heroHtml));
-
-const helpHtml = renderToStaticMarkup(<Help />);
-check('the Amazon wishlist image is gone', !/Amazon-Wish-List/.test(helpHtml) && !/WISHLIST_IMG/.test(allSrc));
-check('the wishlist is a shipping-box line illustration', /ShipBox|<svg/.test(helpHtml) && /stroke="#F70303"/.test(helpHtml));
-check('all three CTAs share one red style', (helpHtml.match(/border-2 border-red bg-red/g) ?? []).length >= 3);
-check('no CTA uses deep red as a resting colour', !/(border-deepred|bg-deepred)(?!.*hover)/.test(helpHtml.replace(/hover:border-deepred|hover:bg-deepred/g, '')));
-check('CTAs are pinned to the bottom of their card', /mt-auto pt-6/.test(helpHtml));
-check('the blank never reflows (word holds the width)', /help-blank-word/.test(helpHtml));
-
-/* ------------------------------------------------------------------ */
-section('ROUND-02 P0 #4 — the nav');
-
-const navHtml = renderToStaticMarkup(<Nav logoRef={createRef<HTMLSpanElement>()} />);
-check('no second X mark in the nav', !/VarsityXShapes/.test(navHtml));
-check('scroll progress is a 2px line on the bottom edge', /h-\[2px\].*origin-left bg-red|origin-left/.test(navHtml) && /bottom-0/.test(navHtml));
-
-/* ------------------------------------------------------------------ */
-section('Brand rules (STUDIO_STANDARDS §2/§3)');
-
-const appHtml = renderToStaticMarkup(<App />);
-const palette = ['#F70303', '#161616', '#F7F7F7', '#A4A4A4', '#930101'];
-check('no off-brand hex colours in source', (() => {
-  const hexes = [...allSrc.matchAll(/#[0-9a-fA-F]{6}\b/g)].map((m) => m[0].toLowerCase());
-  const allowed = new Set([...palette.map((p) => p.toLowerCase()), '#ff3e8e', '#ffe84d', '#ffffff', '#000000', '#5a5a5a', '#5e5e5e', '#191919', '#141414', '#101820', '#0b0b0b', '#fefefe',
-    // round 04: ink/red light-falloff shades used in section gradients
-    '#1b1010', '#3a0606', '#2a2a2a', '#1a1a1a', '#151515']);
-  const bad = hexes.filter((h) => !allowed.has(h));
-  return bad.length === 0 || (console.log('       off-brand:', [...new Set(bad)].join(', ')), false);
-})());
-check(
-  'no emoji anywhere',
-  (() => {
-    // U+00A9 is the copyright sign in the client's own verbatim legal line.
-    const hits = [...allSrc.matchAll(/\p{Extended_Pictographic}/gu)]
-      .map((x) => x[0])
-      .filter((c) => c !== '\u00a9');
-    return hits.length === 0 || (console.log('       emoji:', [...new Set(hits)].join(' ')), false);
-  })(),
-);
-check('no lorem ipsum', !/lorem ipsum/i.test(allSrc));
-check('grain + X pattern present', /grain/i.test(allSrc) && /XPattern/.test(allSrc));
-check('app renders without throwing', appHtml.length > 1000);
-
-/* ------------------------------------------------------------------ */
-section('Accessibility basics');
-
-check('every gallery image has alt text', (() => {
-  const imgs = [...appHtml.matchAll(/<img[^>]*>/g)].map((m) => m[0]);
-  const missing = imgs.filter((t) => !/\balt=/.test(t));
-  return missing.length === 0 || (console.log(`       ${missing.length} img without alt`), false);
-})());
-check('every image sets width and height', (() => {
-  const imgs = [...appHtml.matchAll(/<img[^>]*>/g)].map((m) => m[0]);
-  const missing = imgs.filter((t) => !/\bwidth=/.test(t) || !/\bheight=/.test(t));
-  return missing.length === 0 || (console.log(`       ${missing.length} img without dimensions`), false);
-})());
-check('decorative SVGs are hidden from screen readers', (() => {
-  const svgs = [...appHtml.matchAll(/<svg[^>]*>/g)].map((m) => m[0]);
-  const bad = svgs.filter((t) => !/aria-hidden="true"/.test(t) && !/role="img"/.test(t) && !/<title/.test(t));
-  return bad.length === 0 || (console.log(`       ${bad.length} svg exposed`), false);
-})());
-
-/* ------------------------------------------------------------------ */
-/* ------------------------------------------------------------------ */
-section('ROUND-04 — the logo X everywhere, no intro, in-page menus only');
+section('Copy — the client\'s own words, exactly');
 {
-  check('no hand-drawn X glyph is imported anywhere', !/from ['"].*svg\/XGlyph['"]/.test(allSrc));
-  check('the X cut-out is self-hosted', (() => {
-    try {
-      statSync(join(process.cwd(), 'public', 'brand', 'logo-x.png'));
-      statSync(join(process.cwd(), 'public', 'brand', 'logo-x-tile.png'));
-      return true;
-    } catch {
-      return false;
-    }
-  })());
-  check('the intro is gone', !files.some((f) => f.endsWith('Intro.tsx')) && !/sections\/Intro/.test(allSrc));
-  const navHtml = renderToStaticMarkup(<Nav logoRef={createRef<HTMLSpanElement>()} />);
-  const footHtml = renderToStaticMarkup(<Footer />);
-  const menuHrefs = [...(navHtml + footHtml).matchAll(/<nav[^>]*>([\s\S]*?)<\/nav>/g)]
-    .flatMap((m) => [...m[1].matchAll(/href="([^"]+)"/g)].map((h) => h[1]));
-  check('nav + footer menus only link to sections on this page', menuHrefs.length > 0 && menuHrefs.every((h) => h.startsWith('#')), menuHrefs.join(' '));
-  check('socials live in the footer, not Connect', /aria-label="Instagram/.test(footHtml));
-  check('no reading-card stamps', !/<Stamp\b/.test(sources.get(join(SRC, 'sections', 'Programs.tsx')) ?? ''));
+  // every line below appears on thexforboys.org, character for character
+  const VERBATIM = [
+    'Our mission is to provide our sons with new outlets to explore their unique interests & talents.',
+    'Albany, GA has the highest concentrated poverty rate in Georgia. It is also ranked the 7th most dangerous city in U.S. with offenders being most likely black males as young as eleven years old.',
+    'Donate to The X for Boys & Girls',
+    'Donate to The X',
+    'Your support and contributions will enable us to meet our goals for Life Prep',
+    'How You Can Help',
+    'Registries & Wishlists',
+    'Our Programs',
+    'Automotive Repair Workshops',
+    'We teach simple automotive repair such as oil change, brake pad replacement, alternator repair, tire changing etc.',
+    'Home Improvement Workshops',
+    'We teach simple home improvement such as replacing light fixtures, sheetrock, interior and exterior painting, popcorn ceilings, etc.',
+    'Reading Literacy',
+    'We host a weekly book club to improve reading comprehension and vocabulary building. This also helps with releasing stress, seeing that they are allowed to be vocal about any and everything on their minds.',
+    'Connect With Us!',
+    'Learn more about our upcoming events, fundraisers, and more!',
+    'Follow @thexforboys',
+    'Copyright © 2026 The "X" for Boys - All Rights Reserved.',
+  ];
+  const flat = text.replace(/\s+/g, ' ');
+  const missing = VERBATIM.filter((v) => !flat.includes(v));
+  check('every verbatim line renders exactly (accent styling never splits words)', missing.length === 0, missing.join(' | '));
+
+  const uses = (page.match(/Solving for X/g) ?? []).length;
+  check('"Solving for X" appears in exactly two places', uses === 2, `${uses}`);
+  const retired = ["Let's solve it together", 'Same equation. Every child', "That's the equation", 'You + ', 'Three workshops. One equation', 'Give via PayPal'];
+  check('retired studio lines are gone', !retired.some((r) => allSrc.includes(r)), retired.filter((r) => allSrc.includes(r)).join(', '));
+  check('nav uses their own labels', ['Home', 'Learn More', 'Support Us', 'Gallery'].every((l) => copy.nav.links.some((n) => n.label === l)));
 }
 
 /* ------------------------------------------------------------------ */
-section('ROUND-03 — self-hosted assets, measured logo, nav track');
+section('Brand — real logo, logo X, type');
 {
-  const indexHtml = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
-  check('no wsimg.com URL in src/ or index.html', !/wsimg\.com/.test(allSrc) && !/wsimg\.com/.test(indexHtml));
-  const manifest = JSON.parse(readFileSync(join(SRC, 'content', 'image-manifest.json'), 'utf8')) as Record<
-    string,
-    { slug: string; sizes: { name: number }[] }
-  >;
-  const missing: string[] = [];
-  for (const e of Object.values(manifest))
-    for (const sz of e.sizes)
-      for (const ext of ['webp', 'jpg'])
-        try {
-          statSync(join(process.cwd(), 'public', 'images', `${e.slug}-${sz.name}.${ext}`));
-        } catch {
-          missing.push(`${e.slug}-${sz.name}.${ext}`);
-        }
-  check('every photo has WebP + JPEG at both widths in public/images', missing.length === 0, missing.join(', '));
-  check('trimmed logo + favicon are self-hosted', (() => {
-    try {
-      statSync(join(process.cwd(), 'public', 'brand', 'logo-white.png'));
-      statSync(join(process.cwd(), 'public', 'favicon-32.png'));
-      return /href="\/favicon-32\.png"/.test(indexHtml);
-    } catch {
-      return false;
-    }
-  })());
-  const imagesSrc = sources.get(join(SRC, 'content', 'images.ts')) ?? '';
-  check('program photos match ROUND-03 P0 #1', [
-    /AUTO_1 = img\('IMG_1128\.jpg'/,
-    /AUTO_2 = img\('IMG_1125\.jpg'/,
-    /HOME_1 = img\('107490527_747809919368645_6947944466898993638_\.jpg'/,
-    /READ_1 = img\('112296745_2672695399669168_4236440098798381834\.jpg'/,
-    /READ_2 = img\('115941536_1928831703917630_8727889694125410655\.jpg'/,
-  ].every((re) => re.test(imagesSrc)));
-  check('LOGO_INTRINSIC is the measured 365×418', /LOGO_INTRINSIC = \{ w: 365, h: 418 \}/.test(imagesSrc));
-  const navSrc = sources.get(join(SRC, 'sections', 'Nav.tsx')) ?? '';
-  check(
-    'nav progress track is not red (only the inner bar is)',
-    /bottom-0 block h-\[2px\] bg-off\/\[0\.08\]/.test(navSrc),
+  check('the logo is the self-hosted client PNG', page.includes('/brand/logo-white.png') && exists('public', 'brand', 'logo-white.png'));
+  check('the X is the logo\'s own X (shield removed)', page.includes('/brand/logo-x.png') && exists('public', 'brand', 'logo-x.png'));
+  check('no X is recreated in SVG', !exists('src', 'components', 'svg', 'XGlyph.tsx') && !/VarsityXShapes|XGlyph/.test(allSrc));
+  check('the brand name is in the header', html.nav.includes('The &quot;X&quot; for Boys'));
+  check('headings are medium weight, not black caps', /@apply font-sans font-medium/.test(readFileSync(join(SRC, 'index.css'), 'utf8')));
+  check('one script accent font is loaded', /family=Yellowtail/.test(indexHtml) && /class="accent/.test(page));
+  check('favicon is self-hosted', /href="\/favicon-32\.png"/.test(indexHtml));
+}
+
+/* ------------------------------------------------------------------ */
+section('Clean design — no scribbles, no gloss, less motion');
+{
+  check('no marker scribble / underline / highlighter components remain', !exists('src', 'components', 'svg', 'Marker.tsx') && !/Marker(Scribble|Underline|Scrawl|Check)|HighlighterSwipe|GreaseCircle|RoughRule/.test(allSrc));
+  check('no glossy/embossed CTA style', !/btn-gloss/.test(allSrc));
+  check('no intro, no film grain', !exists('src', 'sections', 'Intro.tsx') && !exists('src', 'components', 'Grain.tsx'));
+  check('the programmes appear once (no Equation section)', !exists('src', 'sections', 'Equation.tsx') && (page.match(/Automotive Repair Workshops/g) ?? []).length === 1);
+  check('program sheets have square corners', !/<article[^>]*rounded/.test(html.programs));
+  check('program sheets carry no blank lines', !/____/.test(html.programs) && !/DATE DUE|DATE:/.test(html.programs));
+  check('no reading-card stamps', !/<Stamp\b|WEEKLY/.test(html.programs));
+}
+
+/* ------------------------------------------------------------------ */
+section('Giving options carry their platform\'s logo');
+{
+  check('GoGetFunding logo on DONATE', /\/brands\/gogetfunding\.svg/.test(html.help) && exists('public', 'brands', 'gogetfunding.svg'));
+  check('PayPal logo on GIVE', /\/brands\/paypal\.svg/.test(html.help) && exists('public', 'brands', 'paypal.svg'));
+  check('Amazon logo on Registries & Wishlists', /\/brands\/amazon\.svg/.test(html.help) && exists('public', 'brands', 'amazon.svg'));
+  check('the old crossed-out box drawing is gone', !/ShipBox/.test(allSrc));
+}
+
+/* ------------------------------------------------------------------ */
+section('Menus and footer');
+{
+  const menuHrefs = [...(html.nav + html.footer).matchAll(/<nav[^>]*>([\s\S]*?)<\/nav>/g)].flatMap((m) =>
+    [...m[1].matchAll(/href="([^"]+)"/g)].map((h) => h[1]),
   );
-  const heroSrc = sources.get(join(SRC, 'sections', 'Hero.tsx')) ?? '';
-  check('hero X is ~2.2x the cap height', /const X_CAPS = 2\.2;/.test(heroSrc));
+  check(
+    'menus only link to this page (plus the Donate platform)',
+    menuHrefs.length > 0 && menuHrefs.every((h) => h.startsWith('#') || h === copy.links.goGetFunding),
+    menuHrefs.join(' '),
+  );
+  check('footer nav includes Donate', /<nav[^>]*>[\s\S]*?>Donate<[\s\S]*?<\/nav>/.test(html.footer));
+  check('footer credit reads "Designed by The Harmon Group"', html.footer.includes('Designed by The Harmon Group'));
+  check('no "Q — client notes" hint in the footer', !/client notes/i.test(html.footer));
+  check('copyright and credit never wrap', (html.footer.match(/whitespace-nowrap/g) ?? []).length >= 2);
+  check('socials live in the footer', /aria-label="Instagram/.test(html.footer));
+}
+
+/* ------------------------------------------------------------------ */
+section('Assets and accessibility');
+{
+  check('no wsimg.com URL anywhere', !/wsimg\.com/.test(allSrc) && !/wsimg\.com/.test(indexHtml));
+  const manifest = JSON.parse(readFileSync(join(SRC, 'content', 'image-manifest.json'), 'utf8')) as Record<string, { slug: string; sizes: { name: number }[] }>;
+  const missing = Object.values(manifest).flatMap((e) =>
+    e.sizes.flatMap((s) => ['webp', 'jpg'].filter((x) => !exists('public', 'images', `${e.slug}-${s.name}.${x}`)).map((x) => `${e.slug}-${s.name}.${x}`)),
+  );
+  check('every photo is self-hosted as WebP + JPEG', missing.length === 0, missing.join(', '));
+  const imgs = [...page.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
+  check('every <img> has width and height', imgs.every((i) => /width="/.test(i) && /height="/.test(i)));
+  check('every content <img> has alt text', imgs.every((i) => /alt="/.test(i)));
+  check('decorative SVGs are hidden from screen readers', [...page.matchAll(/<svg\b[^>]*>/g)].every((m) => /aria-hidden="true"|role="img"|width="0"/.test(m[0])));
+  check('a skip link exists', renderToStaticMarkup(<App />).includes('href="#main"'));
+  check('no emoji', ![...allSrc.matchAll(/\p{Extended_Pictographic}/gu)].some((m) => m[0] !== '©'));
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

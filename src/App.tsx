@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from 'react';
 import { QuestionFlagProvider } from './components/Flag';
-import { Grain } from './components/Grain';
 import { ShieldClip } from './components/Shield';
 import { Nav } from './sections/Nav';
 import { Hero } from './sections/Hero';
@@ -9,7 +8,6 @@ import { Hero } from './sections/Hero';
  * Below-the-fold sections are separate chunks: the first bundle carries only
  * the nav and hero, so the hero photo can paint as soon as possible.
  */
-const Equation = lazy(() => import('./sections/Equation'));
 const Programs = lazy(() => import('./sections/Programs'));
 const Albany = lazy(() => import('./sections/Albany'));
 const Girls = lazy(() => import('./sections/Girls'));
@@ -22,7 +20,6 @@ import { ScrollTrigger } from './lib/gsap';
 
 /** Everything below the hero, in page order. */
 const BELOW_FOLD: Array<[string, ComponentType]> = [
-  ['equation', Equation],
   ['programs', Programs],
   ['albany', Albany],
   ['girls', Girls],
@@ -97,7 +94,6 @@ export default function App() {
           <Footer />
         </Suspense>
       ) : null}
-      <Grain />
       <ShieldClip />
 
     </QuestionFlagProvider>

@@ -13,7 +13,12 @@ export default {
         note: '#FFE84D',
       },
       fontFamily: {
+        // headings — Libre Franklin, as on their current site
         sans: ['"Libre Franklin"', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        // body — Open Sans, as on their current site
+        body: ['"Open Sans"', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        // the one script accent per title (baseball-jersey script)
+        script: ['Yellowtail', 'cursive'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       letterSpacing: {

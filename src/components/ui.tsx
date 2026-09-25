@@ -87,7 +87,7 @@ export const Btn = forwardRef<
   ref,
 ) {
   const variants = {
-    red: 'btn-gloss border-red bg-red text-white hover:bg-deepred hover:border-deepred',
+    red: 'border-red bg-red text-white hover:bg-deepred hover:border-deepred',
     outline: 'border-off/70 bg-transparent text-off hover:border-red hover:text-red',
     ghost: 'border-transparent bg-transparent text-off hover:text-red',
   }[variant];
@@ -160,4 +160,41 @@ export function Eyebrow({ children, className }: { children: ReactNode; classNam
 /** Screen-reader-only text. */
 export function SrOnly({ children }: { children: ReactNode }) {
   return <span className="sr-only">{children}</span>;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Titles with one script accent word                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Renders the client's text exactly as written, with ONE word (or phrase)
+ * set in the red jersey script. Only the styling changes — never the words.
+ */
+export function Accented({
+  text,
+  accent,
+  accentClassName,
+}: {
+  text: string;
+  accent?: string;
+  accentClassName?: string;
+}) {
+  const at = accent ? text.lastIndexOf(accent) : -1;
+  if (!accent || at < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, at)}
+      <span className={`accent ${accentClassName ?? ''}`}>{accent}</span>
+      {text.slice(at + accent.length)}
+    </>
+  );
+}
+
+/** Small arrow for links that leave the site. */
+export function ExternalArrow({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true" focusable="false">
+      <path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }

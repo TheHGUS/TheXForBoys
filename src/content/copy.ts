@@ -12,13 +12,11 @@
  */
 
 export const site = {
-  name: 'The “X” for Boys',
+  name: 'The "X" for Boys', // [VERBATIM] as in their copyright line
   shortName: 'The X for Boys',
-  tagline: 'Solving for X',
-  location: 'Albany, Georgia',
-  ein: '501(c)3 youth mentorship nonprofit',
-  credit: 'Concept by The Harmon Group',
-  copyright: 'Copyright © 2026 The “X” for Boys - All Rights Reserved.',
+  tagline: 'Solving for X', // [NEW] — studio line, use #2 of 2
+  credit: 'Designed by The Harmon Group',
+  copyright: 'Copyright © 2026 The "X" for Boys - All Rights Reserved.', // [VERBATIM]
 } as const;
 
 /** Link targets. Change these in one place. */
@@ -43,134 +41,95 @@ export const links = {
   youtube: 'https://www.youtube.com/channel/UC1Fq_AMbcQYYaN83MfhDWGQ',
 } as const;
 
+/*
+ * ROUND 05 RULE: every visible line below is the client's own wording, exactly
+ * as it appears on thexforboys.org (checked against the live homepage). The
+ * only studio line left is "Solving for X", used in exactly two places (hero
+ * eyebrow, footer tagline). Nothing is paraphrased; the design does the work.
+ */
+
 export const nav = {
   /**
-   * Only sections that exist on this page. The live site's other pages
-   * (About Us, Our Team, Community, Parent Portal, Contact Us) aren't part of
-   * this prototype, so the menus don't link to them.
+   * Their own nav labels (Home · Learn More · Support Us · Gallery), each
+   * pointing at the matching section on this page. Pages that aren't part of
+   * this prototype aren't linked from any menu.
    */
   links: [
-    { label: 'Our Programs', href: '#programs' },
+    { label: 'Home', href: '#top' },
+    { label: 'Learn More', href: '#programs' },
+    { label: 'Support Us', href: '#help' },
     { label: 'Gallery', href: '#gallery' },
-    { label: 'How You Can Help', href: '#help' },
-    { label: 'Connect', href: '#connect' },
   ],
-  cta: 'DONATE',
+  cta: 'DONATE', // [VERBATIM]
   ctaHref: links.goGetFunding,
   menuLabel: 'Menu',
   skipToContent: 'Skip to main content',
 } as const;
 
 export const hero = {
-  headlineTop: 'SOLVING FOR', // [VERBATIM] — main site headline
-  // [NEW] the final "word" of the headline is the outlined varsity X glyph.
-  glyphAlt: 'X',
-  subline:
-    'Our mission is to provide our sons with new outlets to explore their unique interests & talents.', // [VERBATIM]
-  primaryCta: 'Donate Now', // [VERBATIM]
-  secondaryCta: 'See the programs', // [VERBATIM]
-} as const;
-
-export const equation = {
-  /** The three terms, in the order they build. */
-  terms: [
-    { id: 'automotive', label: 'AUTOMOTIVE REPAIR' },
-    { id: 'home', label: 'HOME IMPROVEMENT' },
-    { id: 'reading', label: 'READING LITERACY' },
-  ],
-  operator: '+',
-  equals: '=',
-  result: 'X',
-  /** [NEW] */
-  caption: "Let's solve it together.",
-  /** Per-term captions used in the mobile stack + screen-reader outline. */
-  notes: {
-    automotive: 'Automotive repair',
-    home: 'Home improvement',
-    reading: 'Reading literacy',
-  },
+  eyebrow: 'Solving for X', // [NEW] — studio line, use #1 of 2
+  /** [VERBATIM] their mission — the hero headline. `accent` is styled in script. */
+  headline: 'Our mission is to provide our sons with new outlets to explore their unique interests & talents.',
+  accent: 'sons',
+  primaryCta: 'DONATE NOW', // [VERBATIM]
+  secondaryCta: 'Our Programs', // [VERBATIM]
 } as const;
 
 export const programs = {
   heading: 'Our Programs', // [VERBATIM]
-  intro: 'Three workshops. One equation.', // [NEW]
+  accent: 'Programs',
   items: [
     {
       id: 'automotive',
-      /** The object this programme is rendered as. */
-      object: 'WORK ORDER',
-      title: 'AUTOMOTIVE REPAIR WORKSHOPS', // [VERBATIM]
+      /** The real-world object this programme is printed on (a design label). */
+      object: 'Work order',
+      number: 'No. 001',
+      title: 'Automotive Repair Workshops', // [VERBATIM]
       body:
         'We teach simple automotive repair such as oil change, brake pad replacement, alternator repair, tire changing etc.', // [VERBATIM]
-      checklist: ['Oil change', 'Brake pad replacement', 'Alternator repair', 'Tire changing'], // [VERBATIM]
-      stamp: undefined,
-      highlight: undefined,
-      mono: {
-        no: 'WORK ORDER No. 001', // [NEW] — ticket furniture
-        customer: 'CUSTOMER: THE X FOR BOYS', // [NEW]
-        date: 'DATE: ____ / ____ / ______', // [NEW]
-        tech: 'TECH: MENTOR', // [NEW]
-      },
+      /** Line items — their own words, lifted from the sentence above. */
+      checklist: ['oil change', 'brake pad replacement', 'alternator repair', 'tire changing'],
     },
     {
       id: 'home',
-      object: 'JOB TICKET',
-      title: 'HOME IMPROVEMENT WORKSHOPS', // [VERBATIM]
+      object: 'Job ticket',
+      number: 'No. 002',
+      title: 'Home Improvement Workshops', // [VERBATIM]
       body:
         'We teach simple home improvement such as replacing light fixtures, sheetrock, interior and exterior painting, popcorn ceilings, etc.', // [VERBATIM]
-      checklist: [
-        'Light fixtures',
-        'Sheetrock',
-        'Interior & exterior painting',
-        'Popcorn ceilings',
-      ], // [VERBATIM]
-      stamp: undefined,
-      highlight: undefined,
-      mono: {
-        no: 'JOB TICKET No. 002', // [NEW]
-        customer: 'SITE: ALBANY, GA', // [NEW]
-        date: 'DATE: ____ / ____ / ______', // [NEW]
-        tech: 'CREW: MENTOR + SONS', // [NEW]
-      },
+      checklist: ['replacing light fixtures', 'sheetrock', 'interior and exterior painting', 'popcorn ceilings'],
     },
     {
       id: 'reading',
-      object: 'CHECKOUT CARD',
-      title: 'READING LITERACY', // [VERBATIM]
+      object: 'Checkout card',
+      number: 'No. 003',
+      title: 'Reading Literacy', // [VERBATIM]
       body:
         'We host a weekly book club to improve reading comprehension and vocabulary building. This also helps with releasing stress, seeing that they are allowed to be vocal about any and everything on their minds.', // [VERBATIM]
-      stamp: 'WEEKLY', // [NEW] — rubber stamp on the card
-      highlight: ['comprehension', 'vocabulary'],
-      checklist: undefined,
-      mono: {
-        no: 'CHECKOUT CARD', // [NEW]
-        customer: 'BORROWER: THE X FOR BOYS', // [NEW]
-        date: 'DATE DUE', // [NEW]
-        tech: 'BOOK CLUB — WEEKLY', // [NEW]
-      },
+      checklist: ['reading comprehension', 'vocabulary building'],
     },
   ],
 } as const;
 
 export const albany = {
-  /** [VERBATIM] — statement, revealed word by word. */
+  /** [VERBATIM] */
   statement:
     'Albany, GA has the highest concentrated poverty rate in Georgia. It is also ranked the 7th most dangerous city in U.S. with offenders being most likely black males as young as eleven years old.',
-  /** [NEW] */
-  kicker: "That's the equation we're here to change.",
+  /** [VERBATIM] — their donate block, used as the story's ask */
+  askHeading: 'Donate to The X',
+  askAccent: 'The X',
+  askBody: 'Your support and contributions will enable us to meet our goals for Life Prep',
+  askCta: 'DONATE NOW',
 } as const;
 
 export const girls = {
-  title: 'The X for Boys & Girls', // [VERBATIM] — from their donate block
-  /** [NEW] */
-  sub: 'Same equation. Every child.',
+  title: 'Donate to The X for Boys & Girls', // [VERBATIM]
+  accent: 'Girls',
+  cta: 'DONATE!', // [VERBATIM]
 } as const;
 
 export const club = {
   heading: '#clubphotos', // [VERBATIM]
-  hint: 'Tap a photo to open', // [NEW]
-  frameLabel: 'FRAME', // [NEW]
-  rollLabel: 'ROLL 01', // [NEW]
   lightboxClose: 'Close',
   lightboxPrev: 'Previous photo',
   lightboxNext: 'Next photo',
@@ -178,48 +137,40 @@ export const club = {
 
 export const help = {
   heading: 'How You Can Help', // [VERBATIM]
-  /** [NEW] — the blank fills in as each option is hovered/tapped. */
-  equationPrefix: 'YOU',
-  equationOperator: '+',
-  equationBlankDefault: '___',
-  equationEquals: '=',
-  equationResult: 'X',
+  accent: 'Help',
   options: [
     {
       id: 'donate',
-      word: 'DONATE',
-      title: 'Donate Now', // [VERBATIM]
-      body:
-        'Your support and contributions will enable us to meet our goals for Life Prep', // [VERBATIM]
+      title: 'DONATE', // [VERBATIM]
+      cta: 'DONATE NOW', // [VERBATIM]
       href: links.goGetFunding,
-      note: 'Opens our 2026 end-of-year fundraiser in a new tab', // [NEW]
+      brand: { name: 'GoGetFunding', logo: '/brands/gogetfunding.svg', w: 112, h: 46 },
     },
     {
       id: 'give',
-      word: 'GIVE',
-      title: 'Give via PayPal', // [NEW]
-      body: 'Give through PayPal on our donate page.', // [NEW]
+      title: 'GIVE', // [VERBATIM]
+      cta: 'GIVE', // [VERBATIM]
       href: links.donate,
-      note: 'Real PayPal button to be wired in the next stage', // [NEW]
+      brand: { name: 'PayPal', logo: '/brands/paypal.svg', w: 24, h: 24 },
     },
     {
       id: 'supplies',
-      word: 'SEND SUPPLIES',
       title: 'Registries & Wishlists', // [VERBATIM]
-      body: 'Send what the workshops need, straight from our Amazon wish list.', // [NEW]
+      cta: 'Registries & Wishlists', // [VERBATIM]
       href: links.amazonWishlist,
-      note: 'Opens the Amazon wish list in a new tab', // [NEW]
+      brand: { name: 'Amazon', logo: '/brands/amazon.svg', w: 603, h: 182 },
     },
   ],
 } as const;
 
 export const connect = {
   heading: 'Connect With Us!', // [VERBATIM]
+  accent: 'Us!',
   sub: 'Learn more about our upcoming events, fundraisers, and more!', // [VERBATIM]
-  emailLabel: 'Email address',
-  emailPlaceholder: 'you@email.com', // [NEW]
-  submit: 'Sign up', // [VERBATIM]
-  success: "You're on the list.", // [NEW]
+  emailLabel: 'Email Address', // [VERBATIM]
+  emailPlaceholder: 'Email Address', // [VERBATIM]
+  submit: 'SIGN UP', // [VERBATIM]
+  success: "You're on the list.", // UI feedback only (form is front-end only)
   follow: 'Follow @thexforboys', // [VERBATIM]
   socials: [
     { id: 'instagram', label: 'Instagram', href: links.instagram, handle: '@newemergingking' },
@@ -230,11 +181,12 @@ export const connect = {
 } as const;
 
 export const footer = {
-  /** Same in-page sections as the top nav — no links to pages we don't have. */
+  /** The top nav's sections, plus Donate. */
   links: [
-    { label: 'Our Programs', href: '#programs' },
+    { label: 'Home', href: '#top' },
+    { label: 'Learn More', href: '#programs' },
+    { label: 'Support Us', href: '#help' },
     { label: 'Gallery', href: '#gallery' },
-    { label: 'How You Can Help', href: '#help' },
-    { label: 'Connect', href: '#connect' },
+    { label: 'Donate', href: links.goGetFunding, external: true },
   ],
 } as const;

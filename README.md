@@ -1,8 +1,8 @@
-# “Solving for X” — The “X” for Boys
+# The “X” for Boys — homepage prototype
 
 Pitch prototype homepage for **The “X” for Boys** (thexforboys.org), a 501(c)3
 youth mentorship nonprofit in Albany, Georgia.
-Concept by **The Harmon Group**.
+Designed by **The Harmon Group**.
 
 React + Vite + TypeScript · Tailwind · GSAP 3 (ScrollTrigger) · Lenis.
 No 3D, no WebGL, no stock imagery, no AI-generated imagery.
@@ -24,24 +24,16 @@ npm run check        # static audit: brand rules + round acceptance criteria
 ```
 
 `npm run check` renders the real components with `renderToStaticMarkup` and
-asserts against the markup they produce — no browser needed. It covers the
-“no hand-drawn logo parts” rule, the brand palette, the equation’s two-zone
-split and single-X finale, the programmes’ mobile stacking, CTA consistency,
-and image alt text / dimensions. Geometry that is pure measurement (hero
-headline width, exploded-brake piece ordering) is checked the same way.
+asserts the rules the site lives by: the client's copy appears verbatim,
+"Solving for X" is used exactly twice, the real logo and logo X are used (no
+X drawn by hand), no marker scribbles or glossy CTAs, square-cornered program
+sheets with no blank lines, brand logos on the giving options, menus that only
+point at this page, self-hosted assets, and image/SVG accessibility basics.
 
-`scripts/measure-type.mjs` reads the real Libre Franklin 900 TTF and reports
-exact advance widths, which is how the hero’s fluid clamp was derived:
-
-```bash
-node scripts/measure-type.mjs path/to/LibreFranklin_900Black.ttf
-```
-
-`npm run preview:art` writes PNGs of every piece of line art to a folder, for
-reviewing the drawings without running the site. It needs `sharp`
-(a devDependency — it is not part of the site bundle).
-
-Node 18+ (built and tested on Node 22).
+`npm run screens` (after a build) writes 1440×900 and 375×812 screenshots of
+every section, the mobile menu and the nav progress line to
+`brief/screens/round-05/`, checks the gallery really auto-scrolls, and reports
+any request that leaves localhost.
 
 ---
 
@@ -126,24 +118,20 @@ src/
   lib/
     gsap.ts            GSAP + ScrollTrigger registration
     draw.ts            stroke-dashoffset draw-on helpers
-    wobble.ts          deterministic hand-drawn path generation
     motion.ts          reduced-motion + pointer media queries
     scroll.ts          Lenis singleton + scroll lock
   hooks/
     useSmoothScroll.ts Lenis ⇄ GSAP ticker wiring
   components/
     ui.tsx             Img, Btn, MonoLabel
-    Grain.tsx          site-wide film grain (feTurbulence)
     XPattern.tsx       tiled brand pattern (the logo's X, as a CSS background)
     Shield.tsx         the logo's home-plate shield as a photo frame
     Flag.tsx           Q-key sticky notes
     LogoImage.tsx      the REAL logo (PNG) + the base/fist split for the pop
     svg/
-      Marker.tsx       marker scribbles, underlines, checks, stamps
-      Illustrations.tsx exploded disc brake, stud wall, book, shipping box
       Social.tsx       line social icons
   sections/
-    Nav.tsx  Hero.tsx  Equation.tsx  Programs.tsx
+    Nav.tsx  Hero.tsx  Programs.tsx
     Albany.tsx  Girls.tsx  ClubPhotos.tsx  Help.tsx  Connect.tsx  Footer.tsx
 ```
 
@@ -152,14 +140,14 @@ src/
 ## The mark
 
 **The logo is never redrawn.** The white PNG is the only source for every
-full-logo moment — nav, intro end state, equation finale, footer (see
+full-logo moment — nav and footer (see
 `src/components/LogoImage.tsx`).
 
 **The X is the logo's own X.** `scripts/cut-logo-x.mjs` removes the
 home-plate shield from the client PNG (every visible piece of the shield is its
 own region of pixels) and writes `public/brand/logo-x.png` — the X with its
 raised fist — plus a padded tile for the brand pattern. `LogoX` renders it in
-the hero, the equation's answer, the help line, Albany and the footer;
+the Albany story's ask;
 `XPattern` tiles it. No X is drawn by hand anywhere.
 
 The shield itself frames photos: `src/components/Shield.tsx` clips anything to
@@ -195,8 +183,8 @@ no hairline seam is left where the two clips meet.
   Durations are 0.4–0.9s.
 - Only `transform`, `opacity` and `stroke-dashoffset` are animated.
 - **No intro, no entrance animation** — the page opens on the finished hero.
-- Motion is kept to what carries meaning: the Equation, the Albany parallax
-  story, the gallery's slow auto-scroll, ticks drawing on the programme sheets.
+- Motion is kept to what carries meaning: the Albany parallax story and the
+  gallery's auto-scroll. No scribbles, no entrance animations.
 - **Reduced motion** (`prefers-reduced-motion: reduce`): no pinning, no
   parallax, no auto-scroll; every section renders its finished state.
 
@@ -227,8 +215,6 @@ no hairline seam is left where the two clips meet.
 ## Review tooling (dev only)
 
 - `npm run check` — static audit of brand rules and round acceptance criteria.
-- `node scripts/screens.mjs` — builds nothing; run after `npm run build`.
-  Starts `vite preview` and writes 1440×900 and 375×812 screenshots of every
-  state (intro on a fake clock, each Equation state, every section, the nav
-  progress line) to `brief/screens/round-03/`, and reports any request that
-  leaves localhost.
+- `npm run screens` — run after `npm run build`; see "Run it" above.
+- `npm run assets` / `node scripts/cut-logo-x.mjs` — regenerate the
+  self-hosted photos, logo, favicons and the logo X.

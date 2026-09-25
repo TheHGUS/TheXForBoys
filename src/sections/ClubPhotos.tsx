@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { GALLERY } from '../content/images';
 import { club } from '../content/copy';
-import { Img, MonoLabel } from '../components/ui';
+import { Accented, Img } from '../components/ui';
 import { useReducedMotion } from '../lib/motion';
 import { ShieldFrame } from '../components/Shield';
 import { lockScroll, unlockScroll } from '../lib/scroll';
@@ -17,7 +17,7 @@ import { lockScroll, unlockScroll } from '../lib/scroll';
  */
 
 /** Auto-scroll speed, px per second. */
-const SPEED = 38;
+const SPEED = 95;
 /** How long the row waits after an interaction before moving again. */
 const RESUME_MS = 2200;
 
@@ -168,16 +168,11 @@ export function ClubPhotos() {
   }, [lightbox]);
 
   return (
-    <section id="gallery" className="relative overflow-hidden bg-off py-12 text-ink sm:py-20 lg:py-24" aria-labelledby="club-heading">
+    <section id="gallery" className="relative overflow-hidden bg-ink py-14 text-white sm:py-20 lg:py-24" aria-labelledby="club-heading">
       <div className="shell">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 id="club-heading" className="display text-ink" style={{ fontSize: 'clamp(1.9rem, 6vw, 4.2rem)' }}>
-            {club.heading}
-          </h2>
-          <MonoLabel className="text-ink/70">
-            {GALLERY.length} photos · {club.hint}
-          </MonoLabel>
-        </div>
+        <h2 id="club-heading" className="display text-white" style={{ fontSize: 'clamp(2.1rem, 5vw, 4rem)' }}>
+          <Accented text={club.heading} accent="photos" />
+        </h2>
       </div>
 
       {/* ---------------- the row (rendered twice for an endless loop) ---------------- */}
@@ -239,8 +234,8 @@ function Frame({
         className="group block w-full rounded-lg"
         aria-label={`Open photo ${index + 1}: ${image.alt}`}
       >
-        {/* the logo's keylines: ink, then off-white, then the photo */}
-        <ShieldFrame tone="dark" className="transition-transform duration-300 ease-out group-hover:-translate-y-1">
+        {/* the logo's keylines: off-white, then ink, then the photo */}
+        <ShieldFrame tone="light" className="transition-transform duration-300 ease-out group-hover:-translate-y-1">
           <Img
             image={image}
             className="h-full w-full bg-ink/10"
@@ -249,11 +244,6 @@ function Frame({
           />
         </ShieldFrame>
       </button>
-      <figcaption className="mt-3 text-center">
-        <MonoLabel className="text-ink/60">
-          {String(index + 1).padStart(2, '0')} / {String(GALLERY.length).padStart(2, '0')}
-        </MonoLabel>
-      </figcaption>
     </figure>
   );
 }
@@ -308,9 +298,9 @@ function Lightbox({
       aria-label={`Photo ${index + 1} of ${GALLERY.length}`}
     >
       <div className="flex items-center justify-between px-5 py-4 sm:px-8">
-        <MonoLabel className="text-grey">
-          {club.frameLabel} {String(index + 1).padStart(3, '0')} / {String(GALLERY.length).padStart(3, '0')}
-        </MonoLabel>
+        <span className="text-[0.85rem] text-white/60">
+          {index + 1} / {GALLERY.length}
+        </span>
         <button
           ref={closeRef}
           type="button"

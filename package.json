@@ -9,7 +9,6 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "preview:art": "node scripts/run-preview-art.mjs",
     "check": "node scripts/run-check.mjs",
     "screens": "node scripts/screens.mjs",
     "assets": "node scripts/build-assets.mjs"

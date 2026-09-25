@@ -1,21 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
-import { gsap } from '../lib/gsap';
 import { LogoImage } from '../components/LogoImage';
-import { nav, site } from '../content/copy';
+import { SocialIcon, type SocialId } from '../components/svg/Social';
+import { Img } from '../components/ui';
+import { connect, nav, site } from '../content/copy';
+import { HERO_MAIN } from '../content/images';
 import { lockScroll, scrollToId, unlockScroll } from '../lib/scroll';
 
 /**
  * NAV
- * Transparent over the hero, solid ink at 90% once you scroll. Scroll progress
- * is a 2px red line along the bottom edge of the nav — round 02 removed the
- * second X mark, which read as a glitch next to the lockup.
+ * The real logo with the organisation's name beside it, their own four nav
+ * labels (each pointing at its section on this page) and the Donate button.
+ * Transparent over the hero; dark frosted glass once you scroll. Scroll
+ * progress is a 2px red line on the bottom edge.
+ *
+ * The mobile menu is a full-screen sheet over one of their photos, kept
+ * subtle (dimmed and blurred) so the links stay the focus.
  */
 
 export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
   const progressRef = useRef<HTMLSpanElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   /* ---------------- background + scroll progress ---------------- */
@@ -27,10 +32,7 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
       setSolid(y > 48);
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
-      const el = progressRef.current;
-      // scaleX on a full-width bar: cheaper than rewriting clip-path, and it
-      // composites on the GPU.
-      if (el) el.style.transform = `scaleX(${p.toFixed(4)})`;
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${p.toFixed(4)})`;
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -49,16 +51,6 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
   useEffect(() => {
     if (!open) return;
     lockScroll();
-    const ctx = gsap.context(() => {
-      const items = menuRef.current?.querySelectorAll('[data-menu-item]');
-      if (items?.length) {
-        gsap.fromTo(
-          items,
-          { yPercent: 110, opacity: 0 },
-          { yPercent: 0, opacity: 1, duration: 0.55, stagger: 0.055, ease: 'expo.out', delay: 0.05 },
-        );
-      }
-    }, menuRef);
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
@@ -66,35 +58,47 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
-      ctx.revert();
       unlockScroll();
     };
   }, [open]);
 
+  const go = (href: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setOpen(false);
+    // wait for the menu to close (which unlocks scrolling), then go
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToId(href)));
+  };
+
+  const brand = (
+    <span className="flex items-center gap-3">
+      <span ref={logoRef as React.RefObject<HTMLSpanElement>} className="block">
+        <LogoImage priority label="" className="h-9 w-auto sm:h-10" />
+      </span>
+      <span className="whitespace-nowrap font-sans text-[1.02rem] font-semibold tracking-tighter text-white sm:text-[1.12rem]">
+        {site.name}
+      </span>
+    </span>
+  );
+
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
-          solid ? 'glass-ink !border-x-0 !border-t-0' : 'border-transparent bg-transparent'
+        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+          solid ? 'glass-ink !border-x-0 !border-t-0' : 'border-b border-transparent'
         }`}
       >
         <div className="mx-auto flex h-[68px] w-full max-w-shell items-center justify-between gap-4 px-5 sm:px-8 lg:px-14">
-          {/* lockup — the real logo PNG, never a redraw */}
-          <a href="/" className="flex items-center" aria-label={`${site.name} — home`}>
-            <span ref={logoRef as React.RefObject<HTMLSpanElement>} className="block">
-              <LogoImage priority label="" className="h-8 w-auto sm:h-10" />
-            </span>
+          <a href="#top" onClick={go('#top')} aria-label={`${site.name} — home`}>
+            {brand}
           </a>
 
-          {/* desktop links */}
           <nav aria-label="Primary" className="hidden lg:block">
-            <ul className="flex items-center gap-[1.35vw]">
+            <ul className="flex items-center gap-8">
               {nav.links.map((l) => (
                 <li key={l.label}>
                   <a
                     href={l.href}
-                    className="relative py-2 font-bold uppercase tracking-tightest text-off/85 transition-colors duration-200 hover:text-red"
-                    style={{ fontSize: '0.72rem', letterSpacing: '-0.02em' }}
+                    className="font-sans text-[0.92rem] font-medium text-white/85 transition-colors duration-200 hover:text-white"
                   >
                     {l.label}
                   </a>
@@ -108,33 +112,26 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
               href={nav.ctaHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-xl border-2 border-red bg-red px-4 py-2.5 font-black uppercase tracking-tightest text-white transition-colors duration-200 hover:border-deepred hover:bg-deepred sm:px-6 btn-gloss"
-              style={{ fontSize: '0.72rem' }}
+              className="hidden rounded-lg bg-red px-5 py-2.5 font-sans text-[0.82rem] font-semibold text-white transition-colors duration-200 hover:bg-deepred sm:inline-block"
             >
               {nav.cta}
             </a>
             <button
               type="button"
-              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border-2 border-off/40 lg:hidden"
+              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/30 lg:hidden"
               aria-expanded={open}
               aria-controls="mobile-menu"
               onClick={() => setOpen(true)}
             >
               <span className="sr-only">Open menu</span>
-              <span className="block h-[2px] w-4 bg-off" />
-              <span className="block h-[2px] w-4 bg-off" />
+              <span className="block h-[2px] w-4 rounded bg-white" />
+              <span className="block h-[2px] w-4 rounded bg-white" />
             </button>
           </div>
         </div>
 
-        {/*
-          scroll progress: a 2px line along the bottom edge. The track is an
-          8% off-white hairline; only the inner bar is red, scaled 0 -> 1.
-        */}
-        <span
-          className="absolute inset-x-0 bottom-0 block h-[2px] bg-off/[0.08]"
-          aria-hidden="true"
-        >
+        {/* scroll progress: transparent track, red bar */}
+        <span className="absolute inset-x-0 bottom-0 block h-[2px] bg-off/[0.08]" aria-hidden="true">
           <span ref={progressRef} className="block h-full w-full origin-left scale-x-0 bg-red" />
         </span>
       </header>
@@ -143,59 +140,76 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
       {open ? (
         <div
           id="mobile-menu"
-          ref={menuRef}
-          className="fixed inset-0 z-[60] flex flex-col bg-ink lg:hidden"
+          className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-ink text-white lg:hidden"
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
         >
+          {/* one of their photos, subtle */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <Img image={HERO_MAIN} className="h-full w-full scale-105 opacity-60" imgClassName="h-full w-full object-cover" sizes="100vw" />
+            <div className="absolute inset-0 bg-gradient-to-b from-ink/75 via-ink/60 to-ink/95" />
+          </div>
+
           <div className="relative z-10 flex h-[68px] items-center justify-between px-5">
-            <LogoImage label="" className="h-8 w-auto" />
+            {brand}
             <button
               ref={closeRef}
               type="button"
               onClick={() => setOpen(false)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-off/40"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/30"
             >
               <span className="sr-only">Close menu</span>
               <span className="relative block h-4 w-4">
-                <span className="absolute left-0 top-1/2 block h-[2px] w-full rotate-45 bg-off" />
-                <span className="absolute left-0 top-1/2 block h-[2px] w-full -rotate-45 bg-off" />
+                <span className="absolute left-0 top-1/2 block h-[2px] w-full rotate-45 rounded bg-white" />
+                <span className="absolute left-0 top-1/2 block h-[2px] w-full -rotate-45 rounded bg-white" />
               </span>
             </button>
           </div>
 
-          <nav aria-label="Mobile" className="relative z-10 flex-1 overflow-y-auto px-5 pb-10 pt-4">
+          <nav aria-label="Mobile" className="relative z-10 flex flex-1 flex-col justify-between overflow-y-auto px-5 pb-8 pt-6">
             <ul>
               {nav.links.map((l) => (
-                <li key={l.label} className="overflow-hidden border-b border-white/10">
-                  <span data-menu-item className="block">
-                    <a
-                      href={l.href}
-                      className="block py-4 font-black uppercase leading-[0.95] tracking-tightest text-off transition-colors hover:text-red"
-                      style={{ fontSize: 'clamp(1.9rem, 11vw, 2.75rem)' }}
-                      onClick={(e) => {
-                        // close the menu (which unlocks scrolling), then go
-                        e.preventDefault();
-                        setOpen(false);
-                        requestAnimationFrame(() => requestAnimationFrame(() => scrollToId(l.href)));
-                      }}
-                    >
-                      {l.label}
-                    </a>
-                  </span>
+                <li key={l.label} className="border-b border-white/12">
+                  <a
+                    href={l.href}
+                    onClick={go(l.href)}
+                    className="flex items-center justify-between py-4 font-sans text-[1.7rem] font-medium tracking-tighter text-white"
+                  >
+                    {l.label}
+                    <span className="text-white/40" aria-hidden="true">
+                      →
+                    </span>
+                  </a>
                 </li>
               ))}
             </ul>
-            <div data-menu-item className="mt-8">
+
+            <div className="mt-10">
               <a
                 href={nav.ctaHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block rounded-xl border-2 border-red bg-red px-6 py-4 text-center font-black uppercase tracking-tightest text-white btn-gloss"
+                className="block rounded-xl bg-red px-6 py-4 text-center font-sans text-[0.95rem] font-semibold text-white"
               >
                 {nav.cta}
               </a>
+              <p className="mt-8 font-sans text-[0.85rem] font-medium text-white/70">{connect.follow}</p>
+              <ul className="mt-3 flex gap-2">
+                {connect.socials.map((s) => (
+                  <li key={s.id}>
+                    <a
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${s.label} — ${s.handle}`}
+                      className="glass flex h-11 w-11 items-center justify-center rounded-full"
+                    >
+                      <SocialIcon id={s.id as SocialId} className="h-[18px] w-[18px]" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </nav>
         </div>

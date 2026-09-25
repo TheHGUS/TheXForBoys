@@ -9,24 +9,18 @@ hide them. They are never visible unless you toggle them.
 
 ---
 
-## 1. New lines we wrote (not on the current site)
+## 1. Copy — your words, exactly
 
-| # | Where | Line | Flag |
-|---|-------|------|------|
-| 1 | Hero | The headline ends with the **outlined varsity X glyph** instead of the letter “X” (“SOLVING FOR _X_”) | `NEW LINE` next to Donate Now |
-| 2 | The Equation | **“Let’s solve it together.”** — caption under the finale mark | `NEW LINE` |
-| 3 | Albany | **“That’s the equation we’re here to change.”** — the line after the statistic | `NEW LINE` |
-| 4 | The X for Girls | **“Same equation. Every child.”** — sub-line under “The X for Boys & Girls” | `NEW LINE` |
-| 5 | How You Can Help | **“YOU + \_\_\_ = X”** — the blank fills in with DONATE / GIVE / SEND SUPPLIES | `NEW LINE` |
-| 6 | Our Programs | **“Three workshops. One equation.”** — mono sub-line next to the heading | `NEW LINE` |
-| 7 | How You Can Help | **“Give via PayPal”** as the middle option’s title | `PAYPAL` |
-| 8 | Connect | **“you@email.com”** placeholder and **“You’re on the list.”** confirmation | `NO BACKEND` |
+Since round 05 **every word on the page is taken from your current homepage,
+exactly as written** — nothing paraphrased. The design (layout, type, colour,
+photos) is what changed.
 
-_No new studio-written lines were added in round 02. The copy above is
-unchanged from round 01._
+The only studio-written line is **“Solving for X”**, used in two small places:
+the red script line above the hero headline and the footer tagline. Keep it,
+or remove it?
 
-> There are no other invented claims, numbers, names or statistics on the site.
-> Every other word is lifted from the current thexforboys.org homepage.
+The sign-up form's on-screen confirmation (“You’re on the list.”) is UI
+feedback only, since the form isn't connected yet (`NO BACKEND` flag).
 
 ---
 
@@ -98,30 +92,18 @@ The site says **“Follow @thexforboys”**, but the links we were given point a
 
 ## 6. Also worth a decision (lower priority)
 
-- **Programme treatment:** we presented the three workshops as real objects on
-  a workbench — a mechanic’s work order, a job ticket pinned to a blueprint,
-  and an old library checkout card — instead of three icon cards. Approve the
-  treatment? (`TREATMENT` flag)
-- **Ticket micro-copy** (“WORK ORDER No. 001”, “JOB TICKET No. 002”,
-  “CHECKOUT CARD”, “TECH: MENTOR”, date/duedate rows) is our furniture, not
-  your copy. Fine to keep?
-- **The “WEEKLY” rubber stamp** on the reading card — our addition. Keep?
-- **PayPal:** “Give via PayPal” currently links to `thexforboys.org/donate`.
-  Send us the real PayPal button / hosted link and we’ll wire it in.
-- **Email signup:** front-end only — it stamps a red check but sends nothing.
-  Where should signups go (Mailchimp, Constant Contact, an inbox)?
-- **Nav links** (About Us, Our Team, Community, Gallery, Parent Portal,
-  Contact Us) point at the live thexforboys.org pages. Some may 404 — we left
-  them as-is. They become internal routes when this becomes the real site.
-- **Alt text** was written from the programme context each photo is used in,
-  not from the final crops. Please skim it once the photos are final.
-- **Photos:** we only had the images listed in `src/content/images.ts`. If you
-  have a stronger hero, or more shop/girls photos, send them over.
-- **Contact sheet:** we dropped `DSC01956.JPG` from the `#clubphotos` roll
-  because it is the full-bleed photograph in The X for Girls section directly
-  above it — on mobile you saw the same picture twice in a row. Tell us if you
-  would rather it stayed in the roll.
-- **Wishlists:** the “Registries & Wishlists” card no longer shows the Amazon
-  screenshot (it cropped badly). It now uses a line illustration of a shipping
-  box whose packing tape forms an X. Happy to swap it back if you have a
-  cleanly-cropped version.
+- **Programme treatment:** the three workshops are printed on the real paper
+  they belong to — a work order, a job ticket, a library checkout card — each
+  with only your words, your photo, and the sheet's type and number. Approve?
+- **PayPal:** “GIVE” currently links to `thexforboys.org/donate`. Send us the
+  real PayPal button / hosted link and we’ll wire it in. (`PAYPAL` flag)
+- **Email signup:** front-end only. Where should signups go (Mailchimp,
+  Constant Contact, an inbox)? (`NO BACKEND` flag)
+- **Menus** only link to sections of this page, using your own nav labels
+  (Home, Learn More, Support Us, Gallery). Your other pages (Appointments,
+  Contact Us, Parent Portal…) join the menus when they're built.
+- **Photos:** if you have a stronger hero, a real Albany street/skyline shot,
+  or more shop/girls photos, send them over.
+- **Giving platforms:** the DONATE, GIVE and Registries & Wishlists cards
+  carry the GoGetFunding, PayPal and Amazon logos so visitors know where each
+  button goes.

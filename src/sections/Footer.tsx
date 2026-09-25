@@ -1,105 +1,81 @@
-import { connect, footer, links, site } from '../content/copy';
-import { LogoImage, LogoX } from '../components/LogoImage';
+import { connect, footer, site } from '../content/copy';
+import { LogoImage } from '../components/LogoImage';
 import { SocialIcon, type SocialId } from '../components/svg/Social';
-import { MonoLabel } from '../components/ui';
-import { Flag, FlagHint } from '../components/Flag';
+import { Flag } from '../components/Flag';
 
 /**
- * FOOTER — max ~70vh.
- * The real logo, the link set, one compact row of social icons, the
- * copyright, and the logo's own X — large and faint — bleeding off the bottom
- * edge. Sized to its content.
+ * FOOTER
+ * Logo and name, their nav (plus Donate), their "Follow @thexforboys" with one
+ * row of icons, and a bottom bar whose two lines each stay on one line, even
+ * at 375px.
  */
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-ink pt-8">
-      <div className="shell relative z-10">
-        <div className="flex flex-col gap-8 border-t border-white/10 pt-8 sm:flex-row sm:items-start sm:justify-between lg:pt-10">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-10">
-            {/* the real logo, large */}
-            <span className="relative inline-block">
-              <LogoImage
-                label={`${site.shortName} logo`}
-                className="h-16 w-auto sm:h-20 lg:h-24"
-              />
+    <footer className="relative bg-[#0E0E0E] text-white">
+      <div className="shell py-12 sm:py-14">
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
+          <div>
+            <span className="relative inline-flex items-center gap-4">
+              <LogoImage label={`${site.shortName} logo`} className="h-14 w-auto sm:h-16" />
+              <span>
+                <span className="block font-sans text-[1.2rem] font-semibold tracking-tighter">{site.name}</span>
+                <span className="block font-script text-[1.5rem] leading-none text-red">{site.tagline}</span>
+              </span>
               <Flag id="q-logo-vector" place="bl" />
             </span>
-            <div>
-              <MonoLabel className="block text-grey">
-                {site.location} · {site.ein}
-              </MonoLabel>
-              <MonoLabel className="mt-2 block text-grey/75">{site.tagline}</MonoLabel>
+          </div>
+
+          <div className="flex flex-col gap-8 sm:flex-row sm:gap-16">
+            <nav aria-label="Footer">
+              <ul className="grid grid-cols-2 gap-x-10 gap-y-3 sm:grid-cols-1">
+                {footer.links.map((l) => (
+                  <li key={l.label}>
+                    <a
+                      href={l.href}
+                      {...('external' in l && l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className={`font-sans text-[0.95rem] font-medium transition-colors duration-200 ${
+                        'external' in l && l.external ? 'text-red hover:text-white' : 'text-white/80 hover:text-white'
+                      }`}
+                    >
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div className="relative">
+              <p className="font-sans text-[0.95rem] font-medium text-white/80">{connect.follow}</p>
+              <ul className="mt-3 flex gap-2">
+                {connect.socials.map((s) => (
+                  <li key={s.id}>
+                    <a
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${s.label} — ${s.handle}`}
+                      title={`${s.label} · ${s.handle}`}
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-white transition-colors duration-200 hover:border-red hover:text-red"
+                    >
+                      <SocialIcon id={s.id as SocialId} className="h-[18px] w-[18px]" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <Flag id="q-socials" place="tl" />
             </div>
-          </div>
-
-          <div className="flex flex-col gap-6">
-          <nav aria-label="Footer">
-            <ul className="grid grid-cols-2 gap-x-10 gap-y-2 sm:flex sm:gap-8">
-              {footer.links.map((l) => (
-                <li key={l.label}>
-                  <a
-                    href={l.href}
-                    className="font-bold uppercase tracking-tightest text-off/85 transition-colors duration-200 hover:text-red"
-                    style={{ fontSize: '0.76rem' }}
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* socials: one compact row of icon buttons */}
-          <div className="relative flex flex-wrap items-center gap-3 sm:justify-end">
-            <p className="mr-1 font-mono text-[0.68rem] uppercase tracking-[0.12em] text-grey">
-              {connect.follow}
-            </p>
-            <ul className="flex items-center gap-2">
-              {connect.socials.map((s) => (
-                <li key={s.id}>
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${s.label} — ${s.handle}`}
-                    title={`${s.label} · ${s.handle}`}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-off transition-colors duration-200 hover:border-red hover:text-red"
-                  >
-                    <SocialIcon id={s.id as SocialId} className="h-[18px] w-[18px]" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <Flag id="q-socials" place="tl" />
-          </div>
           </div>
         </div>
       </div>
 
-      {/* the logo's X, large and faint, bleeding off the bottom */}
-      <div className="relative mt-2 h-[16vw] select-none overflow-hidden sm:h-[12vw]" aria-hidden="true">
-        <LogoX className="mx-auto h-[30vw] w-auto opacity-[0.07] sm:h-[24vw]" />
-      </div>
-
-      <div className="shell relative z-10 border-t border-white/10 py-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-grey">
+      <div className="border-t border-white/10">
+        <div className="shell flex flex-col gap-1.5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="whitespace-nowrap text-[0.66rem] text-white/55 min-[400px]:text-[0.72rem] sm:text-[0.8rem]">
             {site.copyright}
           </p>
-          <div className="flex items-center gap-6">
-            <a
-              href={links.donate}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-grey hover:text-red"
-            >
-              Donate
-            </a>
-            <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-grey/75">
-              {site.credit}
-            </p>
-            <FlagHint />
-          </div>
+          <p className="whitespace-nowrap text-[0.66rem] text-white/55 min-[400px]:text-[0.72rem] sm:text-[0.8rem]">
+            {site.credit}
+          </p>
         </div>
       </div>
     </footer>

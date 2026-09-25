@@ -365,3 +365,67 @@ Performance **70** · Accessibility **100** · Best practices 100 · SEO 100
 3. ~~Vercel is not Git-connected~~ — done: the project is now connected to
    TheHGUS/TheXForBoys, and every push to `main` deploys to
    https://thexforboys.vercel.app (other branches get preview URLs).
+
+---
+
+## Round 05 — "their words, cleaner design" (Claude Code)
+
+**Preview:** https://thexforboys.vercel.app (deploys on every push to `main`).
+`npm run build` passes; `npm run check` rewritten for the current rules and
+passes (35 assertions). Screens: `brief/screens/round-05/`.
+
+### Copy
+- **Every word is theirs, exactly** — checked line by line against the live
+  thexforboys.org homepage (the audit asserts each verbatim line renders).
+  Retired studio lines: "Let's solve it together.", "Same equation. Every
+  child.", "You + ___ = X", "Three workshops. One equation.", "Give via
+  PayPal", ticket furniture, and the rest.
+- **"Solving for X" appears exactly twice:** the red script line above the
+  hero headline, and the footer tagline.
+- The hero headline is now their mission statement. Nav uses their labels:
+  Home · Learn More · Support Us · Gallery.
+
+### Design
+- **Type:** Libre Franklin at their weight (500/600, sentence case, like
+  their site) for headings; Open Sans for body (as on their site). One word
+  per title in **Yellowtail**, a baseball-jersey script in red (pink for
+  "Girls"), matching the collegiate X and home-plate shield. The words never
+  change, only the styling.
+- **Clean, lighter page:** white and warm-grey sections (Programs, Girls,
+  Help) alternating with ink (Albany, gallery, Connect, footer). Film grain
+  removed.
+- **Plain CTAs:** no gloss or emboss. The marker line under the hero's
+  donate button is gone.
+- **No scribble lines anywhere:** marker scrawls, underlines, highlighter
+  swipes, rough rules and marker checks are all deleted (`Marker.tsx`).
+- **Programs appear once.** The Equation section, which repeated the three
+  programmes and put icons on top of their photos, is removed. The Albany
+  story's middle beat now uses three other club photos instead of the
+  programmes.
+- **Program sheets:** square corners again (it's paper). Only parts that
+  carry information remain: the sheet type and number, their title, their
+  description, line items lifted from their own sentence, and their photo.
+  No date lines, empty tables, stamps, clips or pins. The photos line up
+  across the three sheets.
+- **How You Can Help:** three clean cards, each with the platform's own logo
+  (GoGetFunding, PayPal, Amazon, in `public/brands/`), their heading and one
+  button. The crossed-out box drawing is gone.
+- **Gallery:** about 2.5× faster (95px/s), dark band, shield frames, no
+  captions.
+- **Header:** logo plus the name "The "X" for Boys".
+- **Mobile menu:** full-screen sheet over one of their photos (dimmed), large
+  links with dividers, a Donate button, and social icons.
+- **Footer:** Donate added to the nav. Bottom bar is two lines, each forced
+  to one line at 375px: the copyright (verbatim) and "Designed by The Harmon
+  Group". The "Q — client notes" hint is removed; the Q key still toggles the
+  notes for the studio.
+
+### Removed files
+`Equation.tsx`, `Intro.tsx` (r04), `Grain.tsx`, `svg/Marker.tsx`,
+`svg/Illustrations.tsx`, `lib/wobble.ts`, and the dev scripts that drew the
+old line art (`preview-art`, `checks/geometry`).
+
+### What I need from you
+1. Keep "Solving for X" in those two places, or drop it entirely?
+2. Still open: the real PayPal link, the email destination, and an actual
+   Albany street or skyline photo.

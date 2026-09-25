@@ -103,6 +103,11 @@ export const READ_2 = img('115941536_1928831703917630_8727889694125410655.jpg', 
   alt: 'An indoor book club session: boys seated with books and papers while a mentor reads aloud.',
 });
 
+/** Albany story, middle beat: the boys, not the programmes (those live once, in Our Programs). */
+export const STORY_1 = img('DY7A8354.jpg', { alt: 'Boys in white X polo shirts laughing together outside a brick building.' });
+export const STORY_2 = img('110994707_2639230719661263_1074496696028095026.jpg', { alt: 'A mentor takes a selfie with a group of boys on a bridge.' });
+export const STORY_3 = img('IMG_1121.jpg', { alt: 'Boys in X shirts and hoodies crowded around the open hood of a truck.' });
+
 /**
  * Contact sheet roll — every gallery photo, in the order specified.
  *

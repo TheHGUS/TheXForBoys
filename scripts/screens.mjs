@@ -6,7 +6,6 @@
  * Starts `vite preview`, then captures at 1440×900 (mouse) and 375×812
  * (touch) into brief/screens/round-04/ (SCREENS_OUT overrides):
  *   - the hero as the page opens (no intro since round 04)
- *   - every Equation state: auto, home, reading, collapse, logo
  *   - every section below it (full element), and the nav progress line at the
  *     top, middle and bottom of the page
  * It also logs every request that leaves localhost (fonts excepted), so
@@ -19,7 +18,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 
-const OUT = process.env.SCREENS_OUT ?? 'brief/screens/round-04';
+const OUT = process.env.SCREENS_OUT ?? 'brief/screens/round-05';
 const PORT = 4179;
 const SITE = `http://localhost:${PORT}/`;
 const only = process.argv.find((a) => a.startsWith('--only='))?.split('=')[1];
@@ -40,13 +39,13 @@ const VIEWPORTS = [
 ].filter((v) => !only || (only === 'desktop' ? v.tag === '1440' : v.tag === '375'));
 
 const SECTIONS = [
-  ['04-programs', 'main > section:nth-of-type(3)'],
-  ['05-albany', 'main > section:nth-of-type(4)'],
-  ['06-girls', 'main > section:nth-of-type(5)'],
-  ['07-clubphotos', 'main > section:nth-of-type(6)'],
-  ['08-help', 'main > section:nth-of-type(7)'],
-  ['09-connect', 'main > section:nth-of-type(8)'],
-  ['10-footer', 'footer'],
+  ['02-programs', '#programs'],
+  ['03-albany', 'main > section:nth-of-type(3)'],
+  ['04-girls', 'main > section:nth-of-type(4)'],
+  ['05-gallery', '#gallery'],
+  ['06-help', '#help'],
+  ['07-connect', '#connect'],
+  ['08-footer', 'footer'],
 ];
 
 const browser = await chromium.launch();
@@ -77,52 +76,6 @@ for (const vp of VIEWPORTS) {
   await shot(page, '01-hero');
   await shot(page, 'nav-top', { clip: { x: 0, y: 0, width: opts.width, height: 90 } });
 
-  /* ---------------- equation ---------------- */
-  if (tag === '1440') {
-    // the section publishes the scroll position of each named state
-    const states = await page.evaluate(() => JSON.parse(document.querySelector('#equation')?.dataset.states ?? '{}'));
-    const names = ['auto', 'home', 'reading', 'collapse', 'logo'];
-    for (const [i, n] of names.entries()) {
-      if (states[n] == null) {
-        console.warn(`  no scroll position for equation state "${n}"`);
-        continue;
-      }
-      await scrollTo(states[n], 1800);
-      await shot(page, `03-equation-${i + 1}-${n}`);
-    }
-    // the screen right after the finale — no dead band allowed
-    if (states.end != null) {
-      await scrollTo(states.end + opts.height * 0.5, 1200);
-      await shot(page, '03-equation-6-after');
-    }
-  } else {
-    const blocks = ['auto', 'home', 'reading'];
-    for (const [i, n] of blocks.entries()) {
-      const y = await page.evaluate(
-        (i) => document.querySelector(`[data-block="${i}"]`).getBoundingClientRect().top + window.scrollY - 80,
-        i,
-      );
-      await scrollTo(y, 4200);
-      await shot(page, `03-equation-${i + 1}-${n}`);
-    }
-    // The finale plays once, as soon as it enters — and it has already
-    // entered while the reading block was on screen. Shoot it on a fresh page
-    // that jumps straight there.
-    const fresh = await ctx.newPage();
-    await fresh.goto(SITE, { waitUntil: 'load' });
-    await fresh.evaluate(() => document.fonts.ready);
-    await wait(800);
-    const fy = await fresh.evaluate(
-      () => document.querySelector('.equation-finale').getBoundingClientRect().top + window.scrollY - 60,
-    );
-    await fresh.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), fy);
-    await wait(380);
-    await shot(fresh, '03-equation-4-collapse');
-    await wait(2200);
-    await shot(fresh, '03-equation-5-logo');
-    await fresh.close();
-  }
-
   /* ---------------- sections: scroll the whole page once so every once-trigger fires ---------------- */
   const H = await page.evaluate(() => document.documentElement.scrollHeight);
   for (let y = 0; y < H; y += Math.round(opts.height * 0.6)) await scrollTo(y, 180);
@@ -130,6 +83,16 @@ for (const vp of VIEWPORTS) {
   await shot(page, 'nav-bottom', { clip: { x: 0, y: 0, width: opts.width, height: 90 } });
   await scrollTo(Math.round(H / 2), 900);
   await shot(page, 'nav-middle', { clip: { x: 0, y: 0, width: opts.width, height: 90 } });
+
+  /* mobile menu, open */
+  if (tag === '375') {
+    await scrollTo(0, 300);
+    await page.click('button[aria-controls="mobile-menu"]');
+    await wait(500);
+    await shot(page, '09-mobile-menu');
+    await page.keyboard.press('Escape');
+    await wait(300);
+  }
 
   /* the gallery must move on its own */
   {
