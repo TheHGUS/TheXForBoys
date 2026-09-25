@@ -4,9 +4,8 @@ import { drawOn, prepStrokes } from '../lib/draw';
 import { useMediaQuery, useReducedMotion } from '../lib/motion';
 import { XPattern } from '../components/XPattern';
 import { Flag } from '../components/Flag';
-import { LogoLockupSplit, sealLogo } from '../components/LogoImage';
-import { LOGO_INTRINSIC } from '../content/images';
-import { XGlyph } from '../components/svg/XGlyph';
+import { LogoLockupSplit, LogoX, sealLogo } from '../components/LogoImage';
+import { LOGO_INTRINSIC, LOGO_X_INTRINSIC } from '../content/images';
 import { Img } from '../components/ui';
 import {
   BRAKE_EXPLODE,
@@ -27,7 +26,8 @@ import { equation } from '../content/copy';
  * The pinned stage is split into two zones that never overlap:
  *   - the EQUATION BAND (top ~30%): the terms, always legible.
  *   - the ILLUSTRATION STAGE (below): a fixed frame holding the photograph
- *     at 55% brightness with white line art drawn over the top.
+ *     at full brightness, with the programme's line art in a small tile in
+ *     the corner — supporting the photo, never covering it.
  *
  * A term that hasn't arrived yet is a faint grey outlined `[ ? ]` the exact
  * width of its word. A real marker scrawl (2–3 uneven looping strokes) draws
@@ -39,11 +39,12 @@ import { equation } from '../content/copy';
 const PHOTOS = [AUTO_1, HOME_1, READ_1] as const;
 
 /**
- * How much of the logo lockup's height its X occupies, measured off the
- * trimmed PNG (the X runs from ~10% to ~88% of the artwork's height). Used to
- * land the travelling glyph on the same size as the X inside the real logo.
+ * The travelling "= X" is the logo's own X (logo-x.png). Inside the full
+ * lockup that X occupies the full width and the top 372/418 of the height —
+ * so the glyph can land exactly on top of the logo's X, and the shield wipes
+ * in around it.
  */
-const LOGO_X_RATIO = 0.78;
+const LOGO_X_BOX_H = LOGO_X_INTRINSIC.h / LOGO_INTRINSIC.h;
 
 /** Scroll distance per second of master-timeline time (desktop pin). */
 const PX_PER_SECOND = 330;
@@ -338,13 +339,13 @@ export function Equation() {
           const gy = Number(gsap.getProperty(result, 'y')) || 0;
           const gs = Number(gsap.getProperty(result, 'scale')) || 1;
           const m = finaleMark.getBoundingClientRect();
-          // the logo's X is centred horizontally; vertically it spans ~10–88%
+          // land on the logo's own X: full width, top 372/418 of the lockup
           const tx = m.left + m.width / 2;
-          const ty = m.top + m.height * 0.49;
+          const ty = m.top + (m.height * LOGO_X_BOX_H) / 2;
           return {
             x: tx - (g.left + g.width / 2 - gx),
             y: ty - (g.top + g.height / 2 - gy),
-            scale: (m.height * LOGO_X_RATIO) / (g.height / gs || 1),
+            scale: m.width / (g.width / gs || 1),
           };
         };
         master.to(
@@ -379,35 +380,7 @@ export function Equation() {
         landAt + 0.42,
       );
       sealLogo(master, finale, landAt + 0.9);
-      if (result) master.to(result, { opacity: 0, duration: 0.25, ease: 'power2.in' }, landAt + 0.05);
-
-      // 4px camera shake at the moment of impact
-      master.fromTo(
-        root.querySelector('.equation-shake') ?? root,
-        { x: 0 },
-        {
-          keyframes: [
-            { x: -4, duration: 0.04 },
-            { x: 3, duration: 0.04 },
-            { x: -2, duration: 0.04 },
-            { x: 0, duration: 0.03 },
-          ],
-          ease: 'none',
-        },
-        landAt + 0.35,
-      );
-
-      // the X pattern pulses once
-      const pattern = root.querySelector<SVGElement>('.xp-fill');
-      if (pattern) {
-        const base = Number(pattern.getAttribute('opacity') ?? 0.05);
-        master.fromTo(
-          pattern,
-          { opacity: base },
-          { opacity: base * 3.2, duration: 0.18, yoyo: true, repeat: 1, ease: 'power2.out' },
-          landAt + 0.35,
-        );
-      }
+      if (result) master.to(result, { opacity: 0, duration: 0.2, ease: 'power2.in' }, landAt + 0.35);
 
       if (caption) {
         master.fromTo(
@@ -460,17 +433,17 @@ export function Equation() {
       className="relative bg-ink"
     >
       <div className="absolute inset-0">
-        <XPattern opacity={0.05} size={140} fillClassName="xp-fill" />
+        <XPattern opacity={0.035} size={170} />
       </div>
 
       <div
         ref={pinRef}
-        className={`equation-shake relative w-full overflow-hidden ${
+        className={`relative w-full overflow-hidden ${
           pinned ? 'lg:h-[100svh] lg:min-h-[640px]' : ''
         }`}
       >
         {/* ---------------- EQUATION BAND (top ~30%, always legible) ---------------- */}
-        <div className="relative z-20 flex w-full justify-center px-5 pt-16 sm:px-8 lg:h-[30%] lg:min-h-[190px] lg:items-center lg:px-14 lg:pt-0">
+        <div className="relative z-20 flex w-full justify-center px-5 pt-8 sm:px-8 lg:h-[30%] lg:min-h-[190px] lg:items-center lg:px-14 lg:pt-0">
           <div
             ref={rowRef}
             className="hidden w-full flex-wrap items-center justify-center gap-x-[1.2vw] gap-y-2 lg:flex"
@@ -504,7 +477,7 @@ export function Equation() {
               className="inline-block shrink-0"
               style={{ height: 'clamp(1.4rem, 3vw, 3rem)' }}
             >
-              <XGlyph variant="solid" className="block h-full w-auto text-off" />
+              <LogoX className="block h-full w-auto" />
             </span>
           </div>
         </div>
@@ -529,9 +502,9 @@ export function Equation() {
         </div>
 
         {/* ---------------- MOBILE: stacked blocks ---------------- */}
-        <div className="w-full pt-4 lg:hidden">
+        <div className="w-full lg:hidden">
           {([0, 1, 2] as const).map((i) => (
-            <div key={i} data-block={i} className="border-b border-white/10 px-5 py-12">
+            <div key={i} data-block={i} className="border-b border-white/10 px-5 py-8">
               <div className="mx-auto w-full max-w-md">
                 <TermSlot index={i} label={equation.terms[i].label} block />
                 {/*
@@ -539,7 +512,7 @@ export function Equation() {
                   absolutely positioned, so without an aspect ratio it
                   collapsed to 0px tall and nothing rendered (ROUND-03 P0 #2).
                 */}
-                <div data-stage={i} className="relative mt-8 aspect-[4/3] w-full">
+                <div data-stage={i} className="relative mt-5 aspect-[4/3] w-full">
                   <StageArt index={i} />
                 </div>
               </div>
@@ -550,7 +523,7 @@ export function Equation() {
         {/* ---------------- FINALE ---------------- */}
         <div
           ref={finaleRef}
-          className={`equation-finale relative z-30 flex flex-col items-center px-6 pb-16 pt-12 text-center ${
+          className={`equation-finale relative z-30 flex flex-col items-center px-6 pb-12 pt-8 text-center ${
             // pt = nav height, so the lockup centres in the visible frame
             pinned ? 'lg:absolute lg:inset-0 lg:justify-center lg:pb-0 lg:pt-[68px]' : 'lg:py-20'
           }`}
@@ -570,7 +543,7 @@ export function Equation() {
               className="inline-block shrink-0"
               style={{ height: 'clamp(1.6rem, 7vw, 2.8rem)' }}
             >
-              <XGlyph variant="solid" className="block h-full w-auto text-off" />
+              <LogoX className="block h-full w-auto" />
             </span>
           </div>
 
@@ -647,46 +620,54 @@ function Stage({ index }: { index: 0 | 1 | 2 }) {
 function StageArt({ index }: { index: 0 | 1 | 2 }) {
   const photo = PHOTOS[index];
   return (
-    <div className="relative h-full w-full overflow-hidden">
-      {/* photograph, full-bleed at 55% brightness, wiped in behind the art */}
+    <div className="relative h-full w-full overflow-hidden rounded-2xl">
+      {/* the photograph is the picture — full brightness, wiped in */}
       <div className="photo absolute inset-0 will-change-[clip-path]">
         <Img
           image={photo}
           className="h-full w-full"
-          imgClassName="h-full w-full object-cover brightness-[0.55]"
+          imgClassName="h-full w-full object-cover"
           sizes="(min-width: 1024px) 1000px, 88vw"
         />
       </div>
 
-      {index === 0 ? <DiscBrake className="absolute inset-0 h-full w-full text-off" /> : null}
+      {/*
+        The programme's line art is a small tile in the corner: it labels the
+        photo (brake / framing / book) instead of drawing over the people in it.
+      */}
+      <div className="absolute bottom-3 left-3 aspect-[4/3] w-[46%] max-w-[280px] glass-ink rounded-xl p-2 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.7)] sm:bottom-4 sm:left-4 sm:w-[30%]">
+        <div className="relative h-full w-full overflow-hidden">
+          {index === 0 ? <DiscBrake className="absolute inset-0 h-full w-full text-off" /> : null}
 
-      {index === 1 ? (
-        <>
-          <BlueprintGrid className="absolute inset-0 h-full w-full text-off/45" />
-          <StudWall className="absolute inset-0 h-full w-full text-off" />
-          <PaintRoller className="roller absolute bottom-[6%] left-0 h-auto w-[19%] text-red will-change-transform" />
-        </>
-      ) : null}
+          {index === 1 ? (
+            <>
+              <BlueprintGrid className="absolute inset-0 h-full w-full text-off/35" />
+              <StudWall className="absolute inset-0 h-full w-full text-off" />
+              <PaintRoller className="roller absolute bottom-[6%] left-0 h-auto w-[19%] text-red will-change-transform" />
+            </>
+          ) : null}
 
-      {index === 2 ? (
-        <>
-          <BookSpread className="absolute inset-0 h-full w-full text-off" />
-          <span
-            className="absolute left-[13%] top-[40%] font-black uppercase leading-none tracking-tightest text-off"
-            style={{ fontSize: 'clamp(0.7rem, 1.8vw, 1.5rem)' }}
-          >
-            <span className="relative z-10">comprehension</span>
-            <HighlighterSwipe className="hl absolute left-[-4%] top-[-10%] h-[120%] w-[108%] text-red/45" seed={17} />
-          </span>
-          <span
-            className="absolute left-[57%] top-[60%] font-black uppercase leading-none tracking-tightest text-off"
-            style={{ fontSize: 'clamp(0.7rem, 1.8vw, 1.5rem)' }}
-          >
-            <span className="relative z-10">vocabulary</span>
-            <HighlighterSwipe className="hl absolute left-[-4%] top-[-10%] h-[120%] w-[108%] text-red/45" seed={29} />
-          </span>
-        </>
-      ) : null}
+          {index === 2 ? (
+            <>
+              <BookSpread className="absolute inset-0 h-full w-full text-off" />
+              <span
+                className="absolute left-[12%] top-[38%] font-black uppercase leading-none tracking-tightest text-off"
+                style={{ fontSize: 'clamp(0.42rem, 0.75vw, 0.72rem)' }}
+              >
+                <span className="relative z-10">comprehension</span>
+                <HighlighterSwipe className="hl absolute left-[-4%] top-[-10%] h-[120%] w-[108%] text-red/60" seed={17} />
+              </span>
+              <span
+                className="absolute left-[56%] top-[58%] font-black uppercase leading-none tracking-tightest text-off"
+                style={{ fontSize: 'clamp(0.42rem, 0.75vw, 0.72rem)' }}
+              >
+                <span className="relative z-10">vocabulary</span>
+                <HighlighterSwipe className="hl absolute left-[-4%] top-[-10%] h-[120%] w-[108%] text-red/60" seed={29} />
+              </span>
+            </>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }
@@ -731,16 +712,22 @@ function mobileFinale(tl: gsap.core.Timeline, finale: HTMLElement): void {
     tl.to(
       glyph,
       {
+        // land exactly on the logo's own X (full width, top 372/418)
+        x: () => {
+          const g = glyph.getBoundingClientRect();
+          const m = mark?.getBoundingClientRect();
+          return m ? m.left + m.width / 2 - (g.left + g.width / 2) : 0;
+        },
         y: () => {
           const g = glyph.getBoundingClientRect();
           const m = mark?.getBoundingClientRect();
           if (!m) return 0;
-          return m.top + m.height * 0.49 - (g.top + g.height / 2);
+          return m.top + (m.height * LOGO_X_BOX_H) / 2 - (g.top + g.height / 2);
         },
         scale: () => {
           const g = glyph.getBoundingClientRect();
           const m = mark?.getBoundingClientRect();
-          return m && g.height ? (m.height * LOGO_X_RATIO) / g.height : 1;
+          return m && g.width ? m.width / g.width : 1;
         },
         duration: 0.8,
         ease: 'power3.inOut',
@@ -758,7 +745,7 @@ function mobileFinale(tl: gsap.core.Timeline, finale: HTMLElement): void {
   );
   tl.fromTo(fist ?? mark, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(2)' }, 0.97);
   sealLogo(tl, finale, 1.45);
-  if (glyph) tl.to(glyph, { opacity: 0, duration: 0.22, ease: 'power2.in' }, 0.55);
+  if (glyph) tl.to(glyph, { opacity: 0, duration: 0.2, ease: 'power2.in' }, 0.9);
   // the "=" goes with the X — nothing is left stranded above the logo
   const eq = finale.querySelector('[data-equals-mobile]');
   if (eq) tl.to(eq, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.3);

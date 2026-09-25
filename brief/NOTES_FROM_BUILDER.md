@@ -1,6 +1,6 @@
 # Notes from builder
 
-**Preview (round 03): https://thexforboys.vercel.app**
+**Preview (latest, round 04): https://thexforboys.vercel.app**
 
 _Builder (Arena / Claude Code) writes here at the end of each round: what changed, what couldn't be done, questions for the studio._
 
@@ -299,3 +299,67 @@ red fails too. It's the brand colour, so I haven't changed it (question 3).
    `thexforboys.vercel.app` alias is public.
 5. A vector logo would still help at the finale's size on large screens (the
    PNG artwork is only 365×418).
+
+---
+
+## Round 04 — client feedback pass (Claude Code)
+
+**Preview:** https://thexforboys.vercel.app (redeployed with this round).
+`npm run build` passes; `npm run check` passes (50 assertions, 7 new). Screens
+at 1440 and 375: `brief/screens/round-04/`.
+
+> **Studio standards overridden by the client's direction:** §6 "sharp
+> corners 0–2px" (now rounded) and §3's ban on glassmorphism/gradients (now
+> glass, gloss and gradients — kept to brand colours and "light", no blobs).
+> Flagging so the studio knows it was deliberate.
+
+### What changed
+- **No intro.** The opening animation is gone and so is the hero's entrance
+  animation — the page opens on the finished hero. `Intro.tsx` deleted.
+- **The logo's X everywhere.** `scripts/cut-logo-x.mjs` removes the shield
+  from the client PNG (each visible shield piece is its own pixel region) →
+  `public/brand/logo-x.png`. It replaces the hand-drawn X in the hero, the
+  equation's answer (it now lands *exactly* on the logo's X before the shield
+  wipes in around it), the help line, Albany and the footer, and it is the
+  brand-pattern tile. `XGlyph.tsx` deleted.
+- **Rounded** buttons, inputs, cards, programme sheets, photos and frames.
+- **Glass / gloss / gradients:** glossy red buttons (lacquer highlight),
+  frosted-glass nav when scrolled, glass Help cards, glass art tiles in the
+  Equation; section light: Programs has an overhead "workbench lamp", Help warms
+  from ink to deep red toward the buttons, Albany falls off to black toward
+  the ask.
+- **Pattern is no longer the whole page:** removed from Programs, Help,
+  Connect, footer and the menu; kept (quieter) behind the Equation and in the
+  X for Girls section. Gallery and Connect are now light sections.
+- **Less animation:** removed hero Ken Burns, pattern drift, camera shake,
+  pattern pulse, magnetic buttons, the reading card's WEEKLY stamps, the
+  gallery's grease-pencil circles and the stamp-slam on the sign-up check.
+- **Equation photos are the picture:** full brightness; the brake / framing /
+  book line art is a small glass tile in the corner instead of drawn over the
+  people.
+- **Gallery:** photos framed in the logo's home-plate shield with its double
+  keyline, on a light band, scrolling on its own (slowly, endlessly). Pauses
+  on hover, drag, swipe or keyboard focus; tap opens the lightbox. Verified it
+  moves at both widths (the screens script measures it).
+- **Parallax story (Albany):** problem → answer → ask. The statistic reads in
+  over the city photo drifting behind; the three programmes rise past in
+  shield frames at three speeds; then the logo X wipes in with "That's the
+  equation we're here to change." and a **Donate Now** button with the
+  verbatim Life Prep line under it.
+- **Socials** moved from Connect into the footer as one row of icon buttons;
+  Connect is now a compact light band with just the sign-up.
+- **Menus:** the top nav, mobile menu and footer now only link to sections on
+  this page (Our Programs, Gallery, How You Can Help, Connect). The live
+  site's other pages aren't linked from any menu. Buttons in the page body are
+  unchanged.
+- **Mobile spacing** tightened (section padding and gaps); the empty band
+  under the X for Girls subline is gone.
+
+### Lighthouse (mobile, local build, median of 3)
+Performance **70** · Accessibility **100** · Best practices 100 · SEO 100
+(FCP 3.0s · LCP 4.5s · TBT ~250ms · CLS 0.01). One run spiked to 53 (TBT).
+
+### What I need from you
+1. Nav labels: "Connect" is short for the verbatim "Connect With Us!" — OK?
+2. The Albany background photo is still the fairground shot (round 03 Q2).
+3. Vercel is still not Git-connected; I redeployed by hand.

@@ -5,7 +5,7 @@
  */
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BRAKE_EXPLODE } from '../../src/components/svg/Illustrations';
-import { X_EM_PER_CAP } from '../../src/components/svg/XGlyph';
+import { LOGO_X_LETTER } from '../../src/content/images';
 import { DiscBrake } from '../../src/components/svg/Illustrations';
 
 let pass = 0, fail = 0;
@@ -50,8 +50,8 @@ for (const vw of [375, 768, 1280, 1440, 1920]) {
 console.log('\nHero X (ROUND-02 P0 #1: >=1.4x the cap height of line 1)');
 {
   const X_CAPS = 2.2;
-  const boxEm = X_EM_PER_CAP * X_CAPS;      // height of the glyph box, in em
-  const visualX = boxEm * (100.4 / 106);    // the drawn X inside its crop
+  const boxEm = (CAP_EM * X_CAPS) / LOGO_X_LETTER; // image box, as Hero.tsx sizes it
+  const visualX = boxEm * LOGO_X_LETTER;           // the letter inside the logo X
   const ratio = visualX / CAP_EM;
   check('X stands ~2.2x the cap height', ratio >= 2.15 && ratio <= 2.3, `${ratio.toFixed(3)}x`);
 }

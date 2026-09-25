@@ -80,8 +80,8 @@ check(
   })(),
 );
 check(
-  'the only SVG recreation left is the plain outlined X',
-  /XGlyph/.test(allSrc) && !/parts=\{\['shield'/.test(allSrc),
+  'no X is recreated in SVG at all (round 04: the logo X is used)',
+  !/XGlyph|VarsityXShapes/.test(allSrc) && !/parts=\{\['shield'/.test(allSrc),
 );
 
 /* ------------------------------------------------------------------ */
@@ -113,7 +113,7 @@ section('ROUND-02 P0 #5 + P2 #10 — the programmes');
 
 const progHtml = renderToStaticMarkup(<Programs />);
 check('no horizontal snap scroller left on mobile', !/snap-x snap-mandatory/.test(progHtml));
-check('stacks below 768px, grid from md up', /flex flex-col gap-8 md:grid md:grid-cols-3/.test(progHtml));
+check('stacks below 768px, grid from md up', /flex flex-col gap-6 md:grid md:grid-cols-3/.test(progHtml));
 check('resting rotation capped at 1deg on mobile', /rotate-\[-1deg\] md:rotate-\[-2deg\]/.test(progHtml));
 check('each object carries its own edge shadow', (progHtml.match(/shadow-\[0_/g) ?? []).length >= 3);
 check('paper texture applied to the sheets', /repeating-linear-gradient/.test(progHtml));
@@ -121,9 +121,9 @@ check('paper texture applied to the sheets', /repeating-linear-gradient/.test(pr
 /* ------------------------------------------------------------------ */
 section('ROUND-02 P0 #1 + P1 #6/#7 — hero and help');
 
-const heroHtml = renderToStaticMarkup(<Hero ready />);
+const heroHtml = renderToStaticMarkup(<Hero />);
 check('the h1 carries the fluid display size', /class="display text-fluid-hero/.test(heroHtml));
-check('the X is a solid glyph with a red inner inline', /inlineColor|#F70303/.test(allSrc) && heroHtml.includes('#F70303'));
+check('the hero X is the logo X (round 04)', heroHtml.includes('/brand/logo-x.png'));
 check('hero photo is not covered by a full-frame wash', !/inset-0 bg-gradient-to-t from-ink via-ink\/40/.test(heroHtml));
 check('the only hero darkening is a bottom-up gradient', /linear-gradient\(to top, #161616/.test(heroHtml));
 
@@ -149,7 +149,9 @@ const appHtml = renderToStaticMarkup(<App />);
 const palette = ['#F70303', '#161616', '#F7F7F7', '#A4A4A4', '#930101'];
 check('no off-brand hex colours in source', (() => {
   const hexes = [...allSrc.matchAll(/#[0-9a-fA-F]{6}\b/g)].map((m) => m[0].toLowerCase());
-  const allowed = new Set([...palette.map((p) => p.toLowerCase()), '#ff3e8e', '#ffe84d', '#ffffff', '#000000', '#5a5a5a', '#5e5e5e', '#191919', '#141414', '#101820', '#0b0b0b', '#fefefe']);
+  const allowed = new Set([...palette.map((p) => p.toLowerCase()), '#ff3e8e', '#ffe84d', '#ffffff', '#000000', '#5a5a5a', '#5e5e5e', '#191919', '#141414', '#101820', '#0b0b0b', '#fefefe',
+    // round 04: ink/red light-falloff shades used in section gradients
+    '#1b1010', '#3a0606', '#2a2a2a', '#1a1a1a', '#151515']);
   const bad = hexes.filter((h) => !allowed.has(h));
   return bad.length === 0 || (console.log('       off-brand:', [...new Set(bad)].join(', ')), false);
 })());
@@ -187,6 +189,29 @@ check('decorative SVGs are hidden from screen readers', (() => {
 })());
 
 /* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+section('ROUND-04 — the logo X everywhere, no intro, in-page menus only');
+{
+  check('no hand-drawn X glyph is imported anywhere', !/from ['"].*svg\/XGlyph['"]/.test(allSrc));
+  check('the X cut-out is self-hosted', (() => {
+    try {
+      statSync(join(process.cwd(), 'public', 'brand', 'logo-x.png'));
+      statSync(join(process.cwd(), 'public', 'brand', 'logo-x-tile.png'));
+      return true;
+    } catch {
+      return false;
+    }
+  })());
+  check('the intro is gone', !files.some((f) => f.endsWith('Intro.tsx')) && !/sections\/Intro/.test(allSrc));
+  const navHtml = renderToStaticMarkup(<Nav logoRef={createRef<HTMLSpanElement>()} />);
+  const footHtml = renderToStaticMarkup(<Footer />);
+  const menuHrefs = [...(navHtml + footHtml).matchAll(/<nav[^>]*>([\s\S]*?)<\/nav>/g)]
+    .flatMap((m) => [...m[1].matchAll(/href="([^"]+)"/g)].map((h) => h[1]));
+  check('nav + footer menus only link to sections on this page', menuHrefs.length > 0 && menuHrefs.every((h) => h.startsWith('#')), menuHrefs.join(' '));
+  check('socials live in the footer, not Connect', /aria-label="Instagram/.test(footHtml));
+  check('no reading-card stamps', !/<Stamp\b/.test(sources.get(join(SRC, 'sections', 'Programs.tsx')) ?? ''));
+}
+
 /* ------------------------------------------------------------------ */
 section('ROUND-03 — self-hosted assets, measured logo, nav track');
 {

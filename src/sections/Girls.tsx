@@ -44,10 +44,10 @@ export function Girls() {
   return (
     <section
       ref={rootRef}
-      className="relative overflow-hidden bg-ink py-16 sm:py-20 lg:py-28"
+      className="relative overflow-hidden bg-ink py-12 sm:py-20 lg:py-28"
       aria-labelledby="girls-title"
     >
-      <XPattern opacity={0.07} size={128} color="#FF3E8E" />
+      <XPattern opacity={0.05} size={140} color="#FF3E8E" />
 
       <div className="shell relative z-10 grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         <div className="order-2 lg:order-1">
@@ -70,16 +70,17 @@ export function Girls() {
               weight={6}
             />
           </div>
-          <div className="relative mt-8 h-6">
+          {/* anchors for the Q-notes only — no height on mobile */}
+          <div className="relative mt-2 h-0 lg:mt-8 lg:h-6">
             <Flag id="q-girls-section" place="tl" />
           </div>
-          <div className="relative mt-14 h-6 lg:mt-20">
+          <div className="relative h-0 lg:mt-20 lg:h-6">
             <Flag id="q-girls-sub" place="bl" />
           </div>
         </div>
 
         <div className="order-1 lg:order-2">
-          <div className="girls-photo relative aspect-[4/5] w-full overflow-hidden sm:aspect-[3/2] lg:aspect-[4/5]">
+          <div className="girls-photo relative aspect-[4/5] w-full overflow-hidden rounded-2xl sm:aspect-[3/2] lg:aspect-[4/5]">
             <Img
               image={GIRLS_HERO}
               className="h-full w-full"

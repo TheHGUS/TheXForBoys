@@ -70,7 +70,7 @@ type Common = {
 };
 
 const BTN_BASE =
-  'group relative inline-flex items-center justify-center gap-2 border-2 px-6 py-3.5 font-black uppercase tracking-tightest transition-colors duration-200 text-[0.82rem] sm:text-[0.9rem] sm:px-8 sm:py-4';
+  'group relative inline-flex items-center justify-center gap-2 rounded-xl border-2 px-6 py-3.5 font-black uppercase tracking-tightest transition-colors duration-200 text-[0.82rem] sm:text-[0.9rem] sm:px-8 sm:py-4';
 
 export const Btn = forwardRef<
   HTMLAnchorElement | HTMLButtonElement,
@@ -87,7 +87,7 @@ export const Btn = forwardRef<
   ref,
 ) {
   const variants = {
-    red: 'border-red bg-red text-white hover:bg-deepred hover:border-deepred',
+    red: 'btn-gloss border-red bg-red text-white hover:bg-deepred hover:border-deepred',
     outline: 'border-off/70 bg-transparent text-off hover:border-red hover:text-red',
     ghost: 'border-transparent bg-transparent text-off hover:text-red',
   }[variant];

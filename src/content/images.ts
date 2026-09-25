@@ -58,6 +58,19 @@ export const LOGO_PNG = '/brand/logo-white.png';
 /** Real pixel size of the trimmed logo artwork. */
 export const LOGO_INTRINSIC = { w: 365, h: 418 } as const;
 
+/**
+ * The X from the logo — the client's own pixels with the shield removed
+ * (scripts/cut-logo-x.mjs). This is the ONLY X on the site: the hero, the
+ * equation's answer, the help line, Albany, the footer and the brand pattern
+ * all use it. The raised fist is part of the X, so the letter itself starts
+ * 12.1% down the image (above that is the fist).
+ */
+export const LOGO_X = '/brand/logo-x.png';
+export const LOGO_X_TILE = '/brand/logo-x-tile.png';
+export const LOGO_X_INTRINSIC = { w: 365, h: 372 } as const;
+/** Fraction of the image height taken by the letter X (below the fist). */
+export const LOGO_X_LETTER = 0.879;
+
 export const HERO_MAIN = img('DSC06682-2.jpg', {
   alt: 'Boys and mentors of The “X” for Boys lined up and waving in their programme shirts in front of a Delta Air Lines hangar.',
 });

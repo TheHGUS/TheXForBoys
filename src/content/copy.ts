@@ -44,14 +44,16 @@ export const links = {
 } as const;
 
 export const nav = {
+  /**
+   * Only sections that exist on this page. The live site's other pages
+   * (About Us, Our Team, Community, Parent Portal, Contact Us) aren't part of
+   * this prototype, so the menus don't link to them.
+   */
   links: [
-    { label: 'Home', href: links.home },
-    { label: 'About Us', href: links.aboutUs },
-    { label: 'Our Team', href: links.ourTeam },
-    { label: 'Community', href: links.community },
-    { label: 'Gallery', href: links.gallery },
-    { label: 'Parent Portal', href: links.parentPortal },
-    { label: 'Contact Us', href: links.contactUs },
+    { label: 'Our Programs', href: '#programs' },
+    { label: 'Gallery', href: '#gallery' },
+    { label: 'How You Can Help', href: '#help' },
+    { label: 'Connect', href: '#connect' },
   ],
   cta: 'DONATE',
   ctaHref: links.goGetFunding,
@@ -166,7 +168,7 @@ export const girls = {
 
 export const club = {
   heading: '#clubphotos', // [VERBATIM]
-  hint: 'Drag to browse', // [NEW]
+  hint: 'Tap a photo to open', // [NEW]
   frameLabel: 'FRAME', // [NEW]
   rollLabel: 'ROLL 01', // [NEW]
   lightboxClose: 'Close',
@@ -228,10 +230,11 @@ export const connect = {
 } as const;
 
 export const footer = {
+  /** Same in-page sections as the top nav — no links to pages we don't have. */
   links: [
-    { label: 'Home', href: links.home },
-    { label: 'Appointments', href: links.appointments },
-    { label: 'Contact Us', href: links.contactUs },
-    { label: 'Parent Portal', href: links.parentPortal },
+    { label: 'Our Programs', href: '#programs' },
+    { label: 'Gallery', href: '#gallery' },
+    { label: 'How You Can Help', href: '#help' },
+    { label: 'Connect', href: '#connect' },
   ],
 } as const;

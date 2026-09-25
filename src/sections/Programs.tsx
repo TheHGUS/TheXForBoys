@@ -5,8 +5,7 @@ import { useReducedMotion } from '../lib/motion';
 import { programs } from '../content/copy';
 import { AUTO_2, HOME_1, READ_2 } from '../content/images';
 import { Img, MonoLabel } from '../components/ui';
-import { XPattern } from '../components/XPattern';
-import { MarkerCheck, RoughRule, Stamp } from '../components/svg/Marker';
+import { MarkerCheck, RoughRule } from '../components/svg/Marker';
 import { BulldogClip, PushPin } from '../components/svg/Illustrations';
 import { Flag } from '../components/Flag';
 
@@ -47,33 +46,14 @@ export function Programs() {
 
       cards.forEach((card, i) => {
         const checks = card.querySelectorAll('.tick path');
-        const stamps = card.querySelectorAll('.stamp');
-        const head = card.querySelector('.ticket-head');
 
         if (reduced) {
           gsap.set(checks, { strokeDashoffset: 0 });
-          gsap.set(stamps, { opacity: 0.92, scale: 1 });
           return;
         }
 
         const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
-        if (head) tl.fromTo(head, { yPercent: -30, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5 }, 0);
         drawOn(tl, checks, { at: 0.15, duration: 0.32, stagger: 0.16, ease: 'power2.out' });
-        if (stamps.length) {
-          tl.fromTo(
-            stamps,
-            { scale: 2.4, opacity: 0, rotate: (i: number) => (i % 2 ? 18 : -22) },
-            {
-              scale: 1,
-              opacity: 0.92,
-              rotate: (i: number) => (i % 2 ? 9 : -8),
-              duration: 0.5,
-              stagger: 0.22,
-              ease: 'back.out(2.2)',
-            },
-            0.7,
-          );
-        }
 
         ScrollTrigger.create({
           trigger: card,
@@ -92,10 +72,13 @@ export function Programs() {
     <section
       ref={rootRef}
       id="programs"
-      className="relative overflow-hidden border-y border-white/10 bg-[#191919] pb-16 pt-14 sm:pb-20 sm:pt-16 lg:pb-28 lg:pt-14"
+      className="relative overflow-hidden border-y border-white/10 pb-12 pt-12 sm:pb-20 sm:pt-16 lg:pb-28 lg:pt-14"
+      style={{
+        // a workbench lamp overhead: light falls from the top centre
+        background: 'radial-gradient(120% 70% at 50% 0%, #2a2a2a 0%, #1a1a1a 55%, #151515 100%)',
+      }}
       aria-labelledby="programs-heading"
     >
-      <XPattern opacity={0.035} size={150} />
 
       <div className="shell relative z-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -113,7 +96,7 @@ export function Programs() {
         </div>
 
         {/* workbench */}
-        <div className="relative mt-12 lg:mt-16">
+        <div className="relative mt-8 sm:mt-12 lg:mt-16">
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent"
             aria-hidden="true"
@@ -125,12 +108,12 @@ export function Programs() {
             body copy and left an empty box with a "SWIPE" hint. Rotations are
             capped at +/-1deg on mobile so nothing hangs outside the gutter.
           */}
-          <div className="flex flex-col gap-8 md:grid md:grid-cols-3 md:gap-8">
+          <div className="flex flex-col gap-6 md:grid md:grid-cols-3 md:gap-8">
             {programs.items.map((item, i) => (
               <div
                 key={item.id}
                 data-ticket
-                className={`group relative w-full ${ROTATIONS[i]} md:min-w-0 ${HOVER_ROTATIONS[i]} transition-[transform,box-shadow] duration-300 ease-out md:hover:z-20 md:hover:-translate-y-2 md:hover:rotate-0 ${SHADOWS[i]} md:hover:shadow-[0_36px_70px_-18px_rgba(0,0,0,0.75)]`}
+                className={`group relative w-full rounded-2xl ${ROTATIONS[i]} md:min-w-0 ${HOVER_ROTATIONS[i]} transition-[transform,box-shadow] duration-300 ease-out md:hover:z-20 md:hover:-translate-y-2 md:hover:rotate-0 ${SHADOWS[i]} md:hover:shadow-[0_36px_70px_-18px_rgba(0,0,0,0.75)]`}
                 style={{ willChange: 'transform' }}
               >
                 <Ticket item={item} index={i} />
@@ -165,7 +148,7 @@ function Ticket({ item, index }: { item: Item; index: number }) {
       {/* (b) blueprint sheet behind the job ticket */}
       {isBlueprint ? (
         <div
-          className="absolute -inset-3 bg-[#101820]"
+          className="absolute -inset-3 rounded-3xl bg-[#101820]"
           style={{
             backgroundImage:
               'linear-gradient(rgba(247,247,247,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(247,247,247,0.10) 1px, transparent 1px)',
@@ -176,7 +159,7 @@ function Ticket({ item, index }: { item: Item; index: number }) {
       ) : null}
 
       <article
-        className={`relative flex h-full flex-col border border-black/10 bg-off text-ink ${
+        className={`relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/10 bg-off text-ink ${
           isCard ? 'p-5 sm:p-6' : 'p-5 sm:p-6'
         }`}
       >
@@ -247,11 +230,6 @@ function Ticket({ item, index }: { item: Item; index: number }) {
                 </div>
               ))}
             </div>
-            <div className="relative mt-4 h-14">
-              <Stamp label={item.stamp ?? 'WEEKLY'} className="stamp absolute left-0 top-0 h-14 w-auto text-red" rotate={-8} />
-              {/* second stamp clears the first at 375 (they overlapped at 38%) */}
-              <Stamp label={item.stamp ?? 'WEEKLY'} className="stamp absolute left-[52%] top-1 h-12 w-auto text-red/80 sm:left-[38%]" rotate={7} seed={44} />
-            </div>
           </div>
         ) : null}
 
@@ -261,8 +239,8 @@ function Ticket({ item, index }: { item: Item; index: number }) {
           <MonoLabel className="mb-1 min-w-0 text-ink/70">
             {isCard ? 'BOOK CLUB — WEEKLY' : item.id === 'home' ? 'SITE: ALBANY, GA' : 'SHOP BAY 01'}
           </MonoLabel>
-          <div className="relative w-[62%] shrink-0 rotate-[2deg] border-2 border-off bg-off p-1.5 shadow-[0_10px_24px_-8px_rgba(0,0,0,0.55)]">
-            <Img image={photo} className="aspect-[4/3] w-full" sizes="(min-width: 1024px) 22vw, 55vw" />
+          <div className="relative w-[62%] shrink-0 rotate-[2deg] rounded-xl border-2 border-off bg-off p-1.5 shadow-[0_10px_24px_-8px_rgba(0,0,0,0.55)]">
+            <Img image={photo} className="aspect-[4/3] w-full overflow-hidden rounded-lg" sizes="(min-width: 1024px) 22vw, 55vw" />
             <BulldogClip className="absolute -top-5 left-4 h-8 w-auto text-ink/75" />
           </div>
         </div>

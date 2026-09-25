@@ -4,8 +4,8 @@
  *   npm run build && node scripts/screens.mjs [--only=desktop|mobile]
  *
  * Starts `vite preview`, then captures at 1440×900 (mouse) and 375×812
- * (touch) into brief/screens/round-03/:
- *   - intro at 0.3s / 0.9s / 1.6s and the hero at rest after it
+ * (touch) into brief/screens/round-04/ (SCREENS_OUT overrides):
+ *   - the hero as the page opens (no intro since round 04)
  *   - every Equation state: auto, home, reading, collapse, logo
  *   - every section below it (full element), and the nav progress line at the
  *     top, middle and bottom of the page
@@ -19,7 +19,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 
-const OUT = 'brief/screens/round-03';
+const OUT = process.env.SCREENS_OUT ?? 'brief/screens/round-04';
 const PORT = 4179;
 const SITE = `http://localhost:${PORT}/`;
 const only = process.argv.find((a) => a.startsWith('--only='))?.split('=')[1];
@@ -57,35 +57,8 @@ for (const vp of VIEWPORTS) {
   const { tag, ...opts } = vp;
   const shot = (page, name, o = {}) => page.screenshot({ path: `${OUT}/${name}-${tag}.png`, ...o });
 
-  /* ---------------- intro on a fake clock ---------------- */
-  {
-    const ctx = await browser.newContext({ viewport: { width: opts.width, height: opts.height }, ...opts });
-    const page = await ctx.newPage();
-    page.on('request', (r) => {
-      const u = new URL(r.url());
-      if (u.hostname !== 'localhost' && !u.hostname.endsWith('googleapis.com') && !u.hostname.endsWith('gstatic.com'))
-        external.add(u.hostname);
-    });
-    await page.clock.install({ time: new Date('2026-09-25T10:00:00') });
-    await page.clock.pauseAt(new Date('2026-09-25T10:00:01'));
-    await page.goto(SITE, { waitUntil: 'load' });
-    await page.evaluate(() => document.fonts.ready);
-    await page.clock.runFor(300);
-    await shot(page, '00-intro-0.3s');
-    await page.clock.runFor(600);
-    await shot(page, '00-intro-0.9s');
-    await page.clock.runFor(700);
-    await shot(page, '00-intro-1.6s');
-    await page.clock.runFor(4000);
-    await page.clock.resume();
-    await wait(400);
-    await shot(page, '01-hero');
-    await ctx.close();
-  }
-
-  /* ---------------- everything else, real time, intro already seen ---------------- */
+  /* ---------------- the page (there is no intro any more) ---------------- */
   const ctx = await browser.newContext({ viewport: { width: opts.width, height: opts.height }, ...opts });
-  await ctx.addInitScript(() => sessionStorage.setItem('txfb:intro-seen', '1'));
   const page = await ctx.newPage();
   page.on('request', (r) => {
     const u = new URL(r.url());
@@ -101,6 +74,7 @@ for (const vp of VIEWPORTS) {
     await wait(settle);
   };
 
+  await shot(page, '01-hero');
   await shot(page, 'nav-top', { clip: { x: 0, y: 0, width: opts.width, height: 90 } });
 
   /* ---------------- equation ---------------- */
@@ -156,6 +130,18 @@ for (const vp of VIEWPORTS) {
   await shot(page, 'nav-bottom', { clip: { x: 0, y: 0, width: opts.width, height: 90 } });
   await scrollTo(Math.round(H / 2), 900);
   await shot(page, 'nav-middle', { clip: { x: 0, y: 0, width: opts.width, height: 90 } });
+
+  /* the gallery must move on its own */
+  {
+    const strip = page.locator('[aria-label^="#clubphotos"]').first();
+    await strip.scrollIntoViewIfNeeded();
+    await page.mouse.move(2, 2);
+    await wait(600);
+    const a = await strip.evaluate((e) => e.scrollLeft);
+    await wait(2000);
+    const b = await strip.evaluate((e) => e.scrollLeft);
+    console.log(`  ${tag}: gallery auto-scroll ${a} -> ${b} ${b !== a ? 'OK' : 'NOT MOVING'}`);
+  }
 
   for (const [name, sel] of SECTIONS) {
     const el = page.locator(sel).first();

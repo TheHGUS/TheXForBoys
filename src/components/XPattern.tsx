@@ -1,53 +1,46 @@
-import { useId, type CSSProperties } from 'react';
-import { VarsityXShapes, X_TIGHT_BOX } from './svg/XGlyph';
-import { useReducedMotion } from '../lib/motion';
-import { gsap } from '../lib/gsap';
-import { useEffect, useRef } from 'react';
+import type { CSSProperties } from 'react';
+import { LOGO_X_TILE } from '../content/images';
 
 /**
- * The brand's repeating tiled X, rebuilt as an SVG pattern. It drifts very
- * slowly behind dark sections so the texture is alive but never distracting.
+ * The brand pattern: the X from the client's logo (with its fist), tiled.
+ *
+ * It's a plain CSS background of the real cut-out PNG — no redrawn X, no
+ * drift, no animation. Used sparingly (the intro, the equation stage, the
+ * girls section) so it reads as a brand texture rather than the whole page.
+ *
+ * The tile image already carries its own spacing (scripts/cut-logo-x.mjs).
+ * `color` tints the silhouette through a mask (the girls' pink); without it
+ * the logo X is shown as-is.
  */
 export function XPattern({
   className,
   style,
-  /** Tile size in px. */
   size = 132,
   opacity = 0.045,
-  color = '#F7F7F7',
-  drift = true,
-  fillClassName,
+  color,
 }: {
   className?: string;
   style?: CSSProperties;
   size?: number;
   opacity?: number;
   color?: string;
-  drift?: boolean;
-  /** Class on the tiled fill — lets a section pulse the pattern. */
-  fillClassName?: string;
 }) {
-  const rawId = useId();
-  const pid = `xp-${rawId.replace(/[^a-zA-Z0-9]/g, '')}`;
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-  const k = size / X_TIGHT_BOX.size;
-
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el || !drift || reduced) return;
-    const tween = gsap.to(el, {
-      xPercent: -4,
-      yPercent: -6,
-      duration: 34,
-      ease: 'sine.inOut',
-      repeat: -1,
-      yoyo: true,
-    });
-    return () => {
-      tween.kill();
-    };
-  }, [drift, reduced]);
+  const tile = `url("${LOGO_X_TILE}")`;
+  const layer: CSSProperties = color
+    ? {
+        backgroundColor: color,
+        WebkitMaskImage: tile,
+        maskImage: tile,
+        WebkitMaskSize: `${size}px ${size}px`,
+        maskSize: `${size}px ${size}px`,
+        WebkitMaskRepeat: 'repeat',
+        maskRepeat: 'repeat',
+      }
+    : {
+        backgroundImage: tile,
+        backgroundSize: `${size}px ${size}px`,
+        backgroundRepeat: 'repeat',
+      };
 
   return (
     <div
@@ -55,27 +48,7 @@ export function XPattern({
       style={style}
       aria-hidden="true"
     >
-      <div ref={wrapRef} className="absolute -inset-[12%] h-[124%] w-[124%] will-change-transform">
-        <svg className="h-full w-full" focusable="false" aria-hidden="true">
-          <defs>
-            <pattern id={pid} width={size} height={size} patternUnits="userSpaceOnUse">
-              <g
-                transform={`translate(${-X_TIGHT_BOX.x * k} ${-X_TIGHT_BOX.y * k}) scale(${k})`}
-                color={color}
-              >
-                <VarsityXShapes />
-              </g>
-            </pattern>
-          </defs>
-          <rect
-            className={fillClassName}
-            width="100%"
-            height="100%"
-            fill={`url(#${pid})`}
-            opacity={opacity}
-          />
-        </svg>
-      </div>
+      <div className="absolute inset-0" style={{ opacity, ...layer }} />
     </div>
   );
 }

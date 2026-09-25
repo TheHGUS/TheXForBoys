@@ -21,11 +21,6 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Sharp corners everywhere by default */
-  * {
-    border-radius: 0;
-  }
-
   ::selection {
     @apply bg-red text-white;
   }
@@ -50,12 +45,48 @@
   img {
     display: block;
   }
+
+  /* in-page nav targets land below the fixed nav */
+  section[id] {
+    scroll-margin-top: var(--nav-h);
+  }
 }
 
 /* ------------------------------------------------------------------
    Utilities
 ------------------------------------------------------------------ */
 @layer utilities {
+  /*
+   * Gloss: the brand red with a soft light falling on its top half and a
+   * hairline highlight on the top edge — like a lacquered sign, not a blob.
+   */
+  .btn-gloss {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.06) 48%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.1) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 10px 24px -12px rgba(247, 3, 3, 0.7);
+  }
+
+  /* Frosted glass on dark: blur what's behind, keep a light edge. */
+  .glass {
+    background-color: rgba(247, 247, 247, 0.08);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
+  }
+
+  /* Darker glass, for surfaces that must stay legible over photos. */
+  .glass-ink {
+    background-color: rgba(22, 22, 22, 0.55);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+  }
+
   /* Display type: huge, tight, Libre Franklin 900 */
   .display {
     @apply font-black uppercase leading-[0.84] tracking-tightest;

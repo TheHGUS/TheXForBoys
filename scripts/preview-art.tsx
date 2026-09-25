@@ -11,7 +11,6 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import sharp from 'sharp';
 import { DiscBrake, StudWall, BlueprintGrid, BookSpread, ShipBox, HighlighterSwipe } from '../src/components/svg/Illustrations';
-import { XGlyph, VarsityXShapes, X_TIGHT_BOX } from '../src/components/svg/XGlyph';
 import { MarkerScribbleLoops } from '../src/components/svg/Marker';
 
 const OUT = process.argv[2] ?? '.arena/art';
@@ -69,32 +68,8 @@ jobs.push([
 /* ---- shipping box (wishlist) ---- */
 jobs.push(['shipbox', poster(560, 448, frame(renderToStaticMarkup(<ShipBox className="text-off" />), 560, 448))]);
 
-/* ---- hero glyph: off-white with a red inner inline ---- */
-jobs.push([
-  'xglyph',
-  poster(
-    720,
-    720,
-    frame(renderToStaticMarkup(<XGlyph variant="solid" inlineColor="#F70303" className="text-off" />), 720, 720),
-  ),
-]);
-jobs.push(['xglyph-outline', poster(720, 720, frame(renderToStaticMarkup(<XGlyph variant="outline" className="text-off" />), 720, 720))]);
-jobs.push(['xglyph-stroke', poster(720, 720, frame(renderToStaticMarkup(<XGlyph variant="stroke" className="text-red" />), 720, 720), '#F70303')]);
-
-/* ---- the tiled brand pattern, using the real VarsityXShapes ---- */
-const k = 120 / X_TIGHT_BOX.size;
-jobs.push([
-  'pattern',
-  `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-    <rect width="600" height="400" fill="${INK}"/>
-    <defs><pattern id="p" width="120" height="120" patternUnits="userSpaceOnUse">
-      <g transform="translate(${-X_TIGHT_BOX.x * k} ${-X_TIGHT_BOX.y * k}) scale(${k})" color="${OFF}">${renderToStaticMarkup(
-        <VarsityXShapes />,
-      )}</g>
-    </pattern></defs>
-    <rect width="600" height="400" fill="url(#p)" opacity="0.05"/>
-  </svg>`,
-]);
+/* The X and the brand pattern are the client's own PNG since round 04
+   (public/brand/logo-x.png) — nothing to rasterise here. */
 
 /* ---- the scribble that hides a term before it resolves ---- */
 jobs.push([

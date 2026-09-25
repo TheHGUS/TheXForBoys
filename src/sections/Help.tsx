@@ -3,10 +3,9 @@ import { gsap } from '../lib/gsap';
 import { drawOn, prepStrokes } from '../lib/draw';
 import { help } from '../content/copy';
 import { MonoLabel } from '../components/ui';
-import { XGlyph } from '../components/svg/XGlyph';
+import { LogoX } from '../components/LogoImage';
 import { MarkerScrawl } from '../components/svg/Marker';
 import { ShipBox as ShipBoxArt } from '../components/svg/Illustrations';
-import { XPattern } from '../components/XPattern';
 import { Flag } from '../components/Flag';
 import { hasFinePointer, useReducedMotion } from '../lib/motion';
 
@@ -75,44 +74,17 @@ export function Help() {
     return () => ctx.revert();
   }, [filled, reduced]);
 
-  /* magnetic hover, desktop only, max 8px */
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root || reduced || !hasFinePointer()) return;
-
-    const cleanups: Array<() => void> = [];
-    root.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
-      const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
-      const yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
-      const onMove = (e: MouseEvent) => {
-        const r = el.getBoundingClientRect();
-        const dx = e.clientX - (r.left + r.width / 2);
-        const dy = e.clientY - (r.top + r.height / 2);
-        xTo(gsap.utils.clamp(-8, 8, dx * 0.18));
-        yTo(gsap.utils.clamp(-8, 8, dy * 0.18));
-      };
-      const onLeave = () => {
-        xTo(0);
-        yTo(0);
-      };
-      el.addEventListener('mousemove', onMove);
-      el.addEventListener('mouseleave', onLeave);
-      cleanups.push(() => {
-        el.removeEventListener('mousemove', onMove);
-        el.removeEventListener('mouseleave', onLeave);
-      });
-    });
-    return () => cleanups.forEach((c) => c());
-  }, [reduced]);
-
   return (
     <section
       ref={rootRef}
       id="help"
-      className="relative overflow-hidden bg-[#141414] py-16 sm:py-20 lg:py-28"
+      className="relative overflow-hidden py-12 sm:py-20 lg:py-28"
+      style={{
+        // the light warms toward red as you get closer to the buttons
+        background: 'linear-gradient(180deg, #161616 0%, #1b1010 55%, #3a0606 100%)',
+      }}
       aria-labelledby="help-heading"
     >
-      <XPattern opacity={0.04} size={160} />
 
       <div className="shell relative z-10">
         <h2
@@ -138,22 +110,20 @@ export function Help() {
             <MarkerScrawl ref={scrawlRef} className="absolute inset-0 h-full w-full text-red" seed={7} />
           </span>
           <span className="text-grey">{help.equationEquals}</span>
-          <span className="inline-block h-[1.1em] w-[1.1em] text-off">
-            <XGlyph variant="solid" className="h-full w-full" />
-          </span>
+          <LogoX label="X" className="inline-block h-[1.3em] w-auto" />
           <span className="relative ml-2">
             <Flag id="q-help-equation" place="tr" />
           </span>
         </div>
 
         {/* options — every CTA shares one style and sits on the bottom edge */}
-        <div className="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-3 lg:gap-8">
+        <div className="mt-8 grid gap-4 sm:gap-6 lg:mt-16 lg:grid-cols-3 lg:gap-8">
           {help.options.map((o, i) => (
             <div
               key={o.id}
               /* flex-col + mt-auto on the footer pins it to the bottom; the
                  footer itself is the same height in every card. */
-              className="flex flex-col border border-white/10 bg-ink/60 p-5 sm:p-6"
+              className="glass flex flex-col rounded-2xl p-5 sm:p-6"
               onMouseEnter={() => setActive(o.id)}
               onFocus={() => setActive(o.id)}
               onMouseLeave={() => setActive(null)}
@@ -181,13 +151,13 @@ export function Help() {
               <div className="relative mt-auto pt-6">
                 <MonoLabel className="block min-h-[3.4em] leading-[1.7] text-grey/75">{o.note}</MonoLabel>
                 <div className="mt-3 flex items-end justify-between gap-4">
-                  <span data-magnetic className="inline-block will-change-transform">
+                  <span className="inline-block">
                     <a
                       href={o.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       onPointerDown={() => setActive(o.id)}
-                      className="inline-flex items-center justify-center border-2 border-red bg-red px-6 py-3.5 font-black uppercase tracking-tightest text-white transition-colors duration-200 hover:border-deepred hover:bg-deepred sm:px-7"
+                      className="inline-flex items-center justify-center rounded-xl border-2 border-red bg-red px-6 py-3.5 font-black uppercase tracking-tightest text-white transition-colors duration-200 hover:border-deepred hover:bg-deepred sm:px-7 btn-gloss"
                       style={{ fontSize: 'clamp(0.78rem, 1.1vw, 0.95rem)' }}
                     >
                       {o.title}

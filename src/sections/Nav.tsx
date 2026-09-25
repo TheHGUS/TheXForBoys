@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from '../lib/gsap';
 import { LogoImage } from '../components/LogoImage';
-import { links, nav, site } from '../content/copy';
-import { XPattern } from '../components/XPattern';
-import { lockScroll, unlockScroll } from '../lib/scroll';
-import { Flag } from '../components/Flag';
+import { nav, site } from '../content/copy';
+import { lockScroll, scrollToId, unlockScroll } from '../lib/scroll';
 
 /**
  * NAV
@@ -77,12 +75,12 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
     <>
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
-          solid ? 'border-white/10 bg-ink/90' : 'border-transparent bg-transparent'
+          solid ? 'glass-ink !border-x-0 !border-t-0' : 'border-transparent bg-transparent'
         }`}
       >
         <div className="mx-auto flex h-[68px] w-full max-w-shell items-center justify-between gap-4 px-5 sm:px-8 lg:px-14">
           {/* lockup — the real logo PNG, never a redraw */}
-          <a href={links.home} className="flex items-center" aria-label={`${site.name} — home`}>
+          <a href="/" className="flex items-center" aria-label={`${site.name} — home`}>
             <span ref={logoRef as React.RefObject<HTMLSpanElement>} className="block">
               <LogoImage priority label="" className="h-8 w-auto sm:h-10" />
             </span>
@@ -110,14 +108,14 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
               href={nav.ctaHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-red bg-red px-4 py-2.5 font-black uppercase tracking-tightest text-white transition-colors duration-200 hover:border-deepred hover:bg-deepred sm:px-6"
+              className="rounded-xl border-2 border-red bg-red px-4 py-2.5 font-black uppercase tracking-tightest text-white transition-colors duration-200 hover:border-deepred hover:bg-deepred sm:px-6 btn-gloss"
               style={{ fontSize: '0.72rem' }}
             >
               {nav.cta}
             </a>
             <button
               type="button"
-              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] border-2 border-off/40 lg:hidden"
+              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border-2 border-off/40 lg:hidden"
               aria-expanded={open}
               aria-controls="mobile-menu"
               onClick={() => setOpen(true)}
@@ -151,14 +149,13 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
           aria-modal="true"
           aria-label="Menu"
         >
-          <XPattern opacity={0.05} size={110} />
           <div className="relative z-10 flex h-[68px] items-center justify-between px-5">
             <LogoImage label="" className="h-8 w-auto" />
             <button
               ref={closeRef}
               type="button"
               onClick={() => setOpen(false)}
-              className="flex h-10 w-10 items-center justify-center border-2 border-off/40"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-off/40"
             >
               <span className="sr-only">Close menu</span>
               <span className="relative block h-4 w-4">
@@ -177,7 +174,12 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
                       href={l.href}
                       className="block py-4 font-black uppercase leading-[0.95] tracking-tightest text-off transition-colors hover:text-red"
                       style={{ fontSize: 'clamp(1.9rem, 11vw, 2.75rem)' }}
-                      onClick={() => setOpen(false)}
+                      onClick={(e) => {
+                        // close the menu (which unlocks scrolling), then go
+                        e.preventDefault();
+                        setOpen(false);
+                        requestAnimationFrame(() => requestAnimationFrame(() => scrollToId(l.href)));
+                      }}
                     >
                       {l.label}
                     </a>
@@ -190,13 +192,10 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
                 href={nav.ctaHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block border-2 border-red bg-red px-6 py-4 text-center font-black uppercase tracking-tightest text-white"
+                className="block rounded-xl border-2 border-red bg-red px-6 py-4 text-center font-black uppercase tracking-tightest text-white btn-gloss"
               >
                 {nav.cta}
               </a>
-            </div>
-            <div className="relative mt-8">
-              <Flag id="q-socials" place="tl" />
             </div>
           </nav>
         </div>

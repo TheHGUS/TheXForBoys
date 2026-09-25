@@ -1,170 +1,154 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { gsap } from '../lib/gsap';
+import { useEffect, useRef, useState } from 'react';
 import { GALLERY } from '../content/images';
 import { club } from '../content/copy';
 import { Img, MonoLabel } from '../components/ui';
-import { GreaseCircle } from '../components/svg/Marker';
-import { hasFinePointer, useReducedMotion } from '../lib/motion';
-import { prepStrokes } from '../lib/draw';
+import { useReducedMotion } from '../lib/motion';
+import { ShieldFrame } from '../components/Shield';
 import { lockScroll, unlockScroll } from '../lib/scroll';
 
 /**
- * #CLUBPHOTOS — a photographer's contact sheet.
- * Dark film strip, sprocket holes, frame numbers in Plex Mono, and a red
- * grease-pencil circle that hand-draws around the frame you're on. Drag with
- * momentum on desktop, native swipe on mobile. Click opens a lightbox.
+ * #CLUBPHOTOS — the photos in the shape of the club's own shield.
+ *
+ * Every frame is the home-plate shield from their logo, with the logo's
+ * double keyline (ink, then off-white) around the photo. The row scrolls on
+ * its own, slowly and endlessly; it pauses while you hover, drag, swipe or
+ * tab through it, and picks up again a moment later. Reduced motion: no
+ * auto-scroll, just a normal swipeable row. Tap a frame to open it large.
  */
+
+/** Auto-scroll speed, px per second. */
+const SPEED = 38;
+/** How long the row waits after an interaction before moving again. */
+const RESUME_MS = 2200;
 
 export function ClubPhotos() {
   const stripRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
+  const setRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const reduced = useReducedMotion();
-  const fine = useRef(hasFinePointer());
-  const prevActive = useRef(-1);
 
-  const drawCircle = useCallback(
-    (index: number, on: boolean) => {
-      if (reduced) return;
-      const el = trackRef.current?.querySelector<HTMLElement>(
-        `[data-frame="${index}"] .grease path, [data-frame="${index}"] .frameno path`,
-      );
-      if (!el) return;
-      const len = (el as unknown as SVGGeometryElement).getTotalLength?.() ?? 0;
-      if (!len) return;
-      gsap.to(el, {
-        strokeDashoffset: on ? 0 : len,
-        duration: on ? 0.55 : 0.25,
-        ease: on ? 'power2.out' : 'power2.in',
-        overwrite: true,
-      });
-    },
-    [reduced],
-  );
-
-  /* ---------------- hide every grease circle until it's drawn ---------------- */
-  useEffect(() => {
-    if (reduced) return;
-    const paths = trackRef.current?.querySelectorAll('.grease path, .frameno path');
-    prepStrokes(paths);
-  }, [reduced]);
-
-  /* ---------------- drag with momentum (desktop) ---------------- */
+  /* ---------------- endless auto-scroll + drag ---------------- */
   useEffect(() => {
     const strip = stripRef.current;
-    if (!strip || !fine.current || reduced) return;
+    const set = setRef.current;
+    if (!strip || !set) return;
 
-    let dragging = false;
-    let startX = 0;
-    let startScroll = 0;
-    let lastX = 0;
-    let lastT = 0;
-    let velocity = 0;
+    let pausedUntil = 0;
+    let hovering = false;
+    let visible = false;
     let raf = 0;
+    let last = 0;
+    let carry = 0;
 
-    const maxScroll = () => Math.max(0, strip.scrollWidth - strip.clientWidth);
+    const pause = (ms = RESUME_MS) => {
+      pausedUntil = performance.now() + ms;
+    };
 
-    const momentum = () => {
-      velocity *= 0.94;
-      strip.scrollLeft -= velocity * 16;
-      const max = maxScroll();
-      if (strip.scrollLeft <= 0 || strip.scrollLeft >= max) velocity = 0;
-      if (Math.abs(velocity) > 0.02) {
-        raf = requestAnimationFrame(momentum);
-      } else {
-        raf = 0;
+    // the row is rendered twice; once we've scrolled a whole set, jump back
+    const wrap = () => {
+      const w = set.offsetWidth;
+      if (w && strip.scrollLeft >= w) strip.scrollLeft -= w;
+      if (w && strip.scrollLeft < 0) strip.scrollLeft += w;
+    };
+
+    const tick = (t: number) => {
+      raf = requestAnimationFrame(tick);
+      const dt = last ? Math.min(64, t - last) : 16;
+      last = t;
+      if (reduced || !visible || hovering || t < pausedUntil || lightboxOpen.current) return;
+      // scrollLeft is integer on some browsers — accumulate sub-pixel steps
+      carry += (SPEED * dt) / 1000;
+      const step = Math.floor(carry);
+      if (step) {
+        carry -= step;
+        strip.scrollLeft += step;
+        wrap();
       }
     };
 
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+    });
+    io.observe(strip);
+
+    /* mouse drag */
+    let dragging = false;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = 0;
     const onDown = (e: PointerEvent) => {
-      if (e.pointerType !== 'mouse') return;
+      if (e.pointerType !== 'mouse') {
+        pause();
+        return;
+      }
       dragging = true;
+      moved = 0;
       startX = e.clientX;
       startScroll = strip.scrollLeft;
-      lastX = e.clientX;
-      lastT = performance.now();
-      velocity = 0;
-      if (raf) cancelAnimationFrame(raf);
-      raf = 0;
-      strip.setPointerCapture(e.pointerId);
     };
     const onMove = (e: PointerEvent) => {
       if (!dragging) return;
       const dx = e.clientX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      if (moved > 4 && !strip.hasPointerCapture(e.pointerId)) strip.setPointerCapture(e.pointerId);
       strip.scrollLeft = startScroll - dx;
-      const now = performance.now();
-      const dt = Math.max(1, now - lastT);
-      velocity = (e.clientX - lastX) / dt;
-      lastX = e.clientX;
-      lastT = now;
+      wrap();
     };
     const onUp = (e: PointerEvent) => {
       if (!dragging) return;
       dragging = false;
       if (strip.hasPointerCapture(e.pointerId)) strip.releasePointerCapture(e.pointerId);
-      if (Math.abs(velocity) > 0.15) raf = requestAnimationFrame(momentum);
+      pause();
     };
-
-    const onWheel = (e: WheelEvent) => {
-      // let horizontal trackpad gestures run the strip
-      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-      e.preventDefault();
-      strip.scrollLeft += e.deltaX;
+    // a drag shouldn't also open the lightbox
+    const onClickCapture = (e: MouseEvent) => {
+      if (moved > 4) {
+        e.stopPropagation();
+        e.preventDefault();
+        moved = 0;
+      }
     };
+    const onEnter = () => (hovering = true);
+    const onLeave = () => {
+      hovering = false;
+      pause(600);
+    };
+    const onScrollUser = () => wrap();
+    const onTouch = () => pause();
+    const onFocusIn = () => pause(8000);
 
     strip.addEventListener('pointerdown', onDown);
     strip.addEventListener('pointermove', onMove);
     strip.addEventListener('pointerup', onUp);
     strip.addEventListener('pointercancel', onUp);
-    strip.addEventListener('wheel', onWheel, { passive: false });
+    strip.addEventListener('click', onClickCapture, true);
+    strip.addEventListener('mouseenter', onEnter);
+    strip.addEventListener('mouseleave', onLeave);
+    strip.addEventListener('scroll', onScrollUser, { passive: true });
+    strip.addEventListener('touchstart', onTouch, { passive: true });
+    strip.addEventListener('wheel', onTouch, { passive: true });
+    strip.addEventListener('focusin', onFocusIn);
+    raf = requestAnimationFrame(tick);
+
     return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
       strip.removeEventListener('pointerdown', onDown);
       strip.removeEventListener('pointermove', onMove);
       strip.removeEventListener('pointerup', onUp);
       strip.removeEventListener('pointercancel', onUp);
-      strip.removeEventListener('wheel', onWheel);
-      if (raf) cancelAnimationFrame(raf);
+      strip.removeEventListener('click', onClickCapture, true);
+      strip.removeEventListener('mouseenter', onEnter);
+      strip.removeEventListener('mouseleave', onLeave);
+      strip.removeEventListener('scroll', onScrollUser);
+      strip.removeEventListener('touchstart', onTouch);
+      strip.removeEventListener('wheel', onTouch);
+      strip.removeEventListener('focusin', onFocusIn);
     };
   }, [reduced]);
 
-  /* ---------------- which frame is centred (mobile) ---------------- */
-  useEffect(() => {
-    const strip = stripRef.current;
-    if (!strip || fine.current) return;
-    let raf = 0;
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        const frames = trackRef.current?.querySelectorAll<HTMLElement>('[data-frame]');
-        if (!frames) return;
-        const mid = strip.scrollLeft + strip.clientWidth / 2;
-        let best = 0;
-        let bestDist = Infinity;
-        frames.forEach((f, i) => {
-          const c = f.offsetLeft + f.offsetWidth / 2;
-          const d = Math.abs(c - mid);
-          if (d < bestDist) {
-            bestDist = d;
-            best = i;
-          }
-        });
-        if (best !== prevActive.current) {
-          if (prevActive.current >= 0) drawCircle(prevActive.current, false);
-          drawCircle(best, true);
-          prevActive.current = best;
-          setActive(best);
-        }
-      });
-    };
-    strip.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => {
-      strip.removeEventListener('scroll', onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [drawCircle]);
+  const lightboxOpen = useRef(false);
+  lightboxOpen.current = lightbox !== null;
 
   /* ---------------- lightbox ---------------- */
   useEffect(() => {
@@ -184,60 +168,46 @@ export function ClubPhotos() {
   }, [lightbox]);
 
   return (
-    <section
-      className="relative overflow-hidden border-y border-white/10 bg-ink py-16 sm:py-20 lg:py-24"
-      aria-labelledby="club-heading"
-    >
+    <section id="gallery" className="relative overflow-hidden bg-off py-12 text-ink sm:py-20 lg:py-24" aria-labelledby="club-heading">
       <div className="shell">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2
-            id="club-heading"
-            className="display text-off"
-            style={{ fontSize: 'clamp(1.9rem, 6vw, 4.2rem)' }}
-          >
+          <h2 id="club-heading" className="display text-ink" style={{ fontSize: 'clamp(1.9rem, 6vw, 4.2rem)' }}>
             {club.heading}
           </h2>
-          <MonoLabel className="text-grey">
+          <MonoLabel className="text-ink/70">
             {GALLERY.length} photos · {club.hint}
           </MonoLabel>
         </div>
       </div>
 
-      {/* ---------------- film strip ---------------- */}
+      {/* ---------------- the row (rendered twice for an endless loop) ---------------- */}
       <div
         ref={stripRef}
         tabIndex={0}
         role="region"
-        aria-label={`${club.heading} contact sheet — scroll or use the arrow keys`}
+        aria-label={`${club.heading} — scrolling photo row. Hover or focus to pause; use the arrow keys to move.`}
         onKeyDown={(e) => {
           if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
           e.preventDefault();
           const strip = stripRef.current;
-          if (strip) strip.scrollLeft += e.key === 'ArrowRight' ? 320 : -320;
+          if (strip) strip.scrollBy({ left: e.key === 'ArrowRight' ? 260 : -260, behavior: 'smooth' });
         }}
-        className="no-scrollbar relative mt-10 w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain md:cursor-grab md:snap-none md:overflow-hidden md:active:cursor-grabbing"
+        className="no-scrollbar relative mt-8 w-full overflow-x-auto overscroll-x-contain md:cursor-grab md:active:cursor-grabbing"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        <div ref={trackRef} className="flex w-max gap-3 px-5 sm:px-8 lg:px-14">
-          {GALLERY.map((img, i) => (
-            <Frame
-              key={`${img.src}-${i}`}
-              index={i}
-              image={img}
-              isActive={active === i}
-              onEnter={() => fine.current && drawCircle(i, true)}
-              onLeave={() => fine.current && drawCircle(i, false)}
-              onOpen={() => setLightbox(i)}
-            />
-          ))}
+        <div className="flex w-max">
+          <div ref={setRef} className="flex gap-5 pl-5 sm:gap-6 sm:pl-6">
+            {GALLERY.map((img, i) => (
+              <Frame key={`a-${i}`} index={i} image={img} onOpen={() => setLightbox(i)} />
+            ))}
+          </div>
+          {/* the loop's second pass — hidden from assistive tech and the tab order */}
+          <div className="flex gap-5 pl-5 sm:gap-6 sm:pl-6" aria-hidden="true">
+            {GALLERY.map((img, i) => (
+              <Frame key={`b-${i}`} index={i} image={img} onOpen={() => setLightbox(i)} inert />
+            ))}
+          </div>
         </div>
-      </div>
-
-      <div className="shell mt-6 flex items-center justify-between">
-        <MonoLabel className="text-grey/75">
-          {club.rollLabel} · {String(active + 1).padStart(2, '0')} / {GALLERY.length}
-        </MonoLabel>
-        <MonoLabel className="text-grey/75">Albany, GA</MonoLabel>
       </div>
 
       {lightbox !== null ? (
@@ -252,87 +222,37 @@ export function ClubPhotos() {
 function Frame({
   index,
   image,
-  isActive,
-  onEnter,
-  onLeave,
   onOpen,
+  inert = false,
 }: {
   index: number;
   image: (typeof GALLERY)[number];
-  isActive: boolean;
-  onEnter: () => void;
-  onLeave: () => void;
   onOpen: () => void;
+  inert?: boolean;
 }) {
   return (
-    <figure
-      data-frame={index}
-      className="relative w-[74vw] shrink-0 snap-center sm:w-[46vw] lg:w-[30vw] xl:w-[24vw]"
-    >
-      <div className="relative border-y-[10px] border-[#0b0b0b] bg-[#0b0b0b] py-3">
-        {/* sprocket holes */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[10px]"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(90deg, rgba(247,247,247,0.22) 0 8px, transparent 8px 22px)',
-          }}
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[10px]"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(90deg, rgba(247,247,247,0.22) 0 8px, transparent 8px 22px)',
-          }}
-          aria-hidden="true"
-        />
-
-        <button
-          type="button"
-          onClick={onOpen}
-          onMouseEnter={onEnter}
-          onMouseLeave={onLeave}
-          onFocus={onEnter}
-          onBlur={onLeave}
-          className="group relative block w-full overflow-hidden"
-          aria-label={`Open photo ${index + 1}: ${image.alt}`}
-        >
+    <figure data-frame={inert ? undefined : index} className="w-[58vw] shrink-0 sm:w-[34vw] lg:w-[21vw] xl:w-[17vw]">
+      <button
+        type="button"
+        onClick={onOpen}
+        tabIndex={inert ? -1 : 0}
+        className="group block w-full rounded-lg"
+        aria-label={`Open photo ${index + 1}: ${image.alt}`}
+      >
+        {/* the logo's keylines: ink, then off-white, then the photo */}
+        <ShieldFrame tone="dark" className="transition-transform duration-300 ease-out group-hover:-translate-y-1">
           <Img
             image={image}
-            className="aspect-[4/3] w-full bg-black"
-            imgClassName="h-full w-full object-cover transition-[filter] duration-300 group-hover:brightness-[1.08]"
-            sizes="(min-width: 1280px) 24vw, (min-width: 640px) 46vw, 74vw"
+            className="h-full w-full bg-ink/10"
+            imgClassName="h-full w-full object-cover"
+            sizes="(min-width: 1280px) 17vw, (min-width: 1024px) 21vw, (min-width: 640px) 34vw, 58vw"
           />
-          <GreaseCircle
-            className="grease pointer-events-none absolute -inset-[6%] h-[112%] w-[112%] text-red"
-            weight={4}
-            seed={3 + index * 5}
-          />
-        </button>
-      </div>
-      <figcaption className="mt-2 flex items-baseline justify-between gap-3">
-        {/*
-          The frame number, circled in grease pencil when this frame is the
-          current one — the way a photographer marks up a contact sheet.
-        */}
-        <span className="relative inline-block px-2 py-1">
-          <MonoLabel
-            className={
-              isActive
-                ? 'relative z-10 text-off transition-colors duration-200'
-                : 'relative z-10 text-grey/75 transition-colors duration-200'
-            }
-          >
-            {club.frameLabel} {String(index + 1).padStart(3, '0')}
-          </MonoLabel>
-          <GreaseCircle
-            className="frameno pointer-events-none absolute -inset-[14%] h-[128%] w-[128%] text-red"
-            weight={3}
-            seed={3 + index * 5}
-          />
-        </span>
-        <MonoLabel className="text-grey/75">35MM</MonoLabel>
+        </ShieldFrame>
+      </button>
+      <figcaption className="mt-3 text-center">
+        <MonoLabel className="text-ink/60">
+          {String(index + 1).padStart(2, '0')} / {String(GALLERY.length).padStart(2, '0')}
+        </MonoLabel>
       </figcaption>
     </figure>
   );
@@ -395,7 +315,7 @@ function Lightbox({
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="border-2 border-off/40 px-4 py-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-off hover:border-red hover:text-red"
+          className="rounded-xl border-2 border-off/40 px-4 py-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-off hover:border-red hover:text-red"
         >
           {club.lightboxClose}
         </button>
@@ -420,7 +340,7 @@ function Lightbox({
           type="button"
           onClick={() => onIndex((index - 1 + GALLERY.length) % GALLERY.length)}
           aria-label={club.lightboxPrev}
-          className="absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center border-2 border-off/30 bg-ink/60 text-off hover:border-red hover:text-red sm:left-6"
+          className="absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-xl border-2 border-off/30 bg-ink/60 text-off hover:border-red hover:text-red sm:left-6"
         >
           <span aria-hidden="true">←</span>
         </button>
@@ -428,7 +348,7 @@ function Lightbox({
           type="button"
           onClick={() => onIndex((index + 1) % GALLERY.length)}
           aria-label={club.lightboxNext}
-          className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center border-2 border-off/30 bg-ink/60 text-off hover:border-red hover:text-red sm:right-6"
+          className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-xl border-2 border-off/30 bg-ink/60 text-off hover:border-red hover:text-red sm:right-6"
         >
           <span aria-hidden="true">→</span>
         </button>

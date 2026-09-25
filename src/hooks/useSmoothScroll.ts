@@ -40,7 +40,8 @@ export function useSmoothScroll(enabled = true): void {
       const el = document.querySelector(id);
       if (!el) return;
       e.preventDefault();
-      lenis.scrollTo(el as HTMLElement, { offset: -8 });
+      // land below the fixed nav
+      lenis.scrollTo(el as HTMLElement, { offset: -68 });
     };
     document.addEventListener('click', onAnchor);
 

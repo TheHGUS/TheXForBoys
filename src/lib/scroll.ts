@@ -39,6 +39,8 @@ export function scrollToId(id: string): void {
   const el = document.querySelector(id);
   if (!el) return;
   const l = getLenis();
-  if (l) l.scrollTo(el as HTMLElement, { offset: 0 });
+  // scroll-margin-top (index.css) keeps native jumps below the fixed nav;
+  // Lenis needs the same offset passed explicitly
+  if (l) l.scrollTo(el as HTMLElement, { offset: -68 });
   else (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

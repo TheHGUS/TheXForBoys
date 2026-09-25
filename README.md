@@ -134,16 +134,16 @@ src/
   components/
     ui.tsx             Img, Btn, MonoLabel
     Grain.tsx          site-wide film grain (feTurbulence)
-    XPattern.tsx       tiled brand X pattern
+    XPattern.tsx       tiled brand pattern (the logo's X, as a CSS background)
+    Shield.tsx         the logo's home-plate shield as a photo frame
     Flag.tsx           Q-key sticky notes
     LogoImage.tsx      the REAL logo (PNG) + the base/fist split for the pop
     svg/
-      XGlyph.tsx       the plain outlined X — typographic glyph only
       Marker.tsx       marker scribbles, underlines, checks, stamps
       Illustrations.tsx exploded disc brake, stud wall, book, shipping box
       Social.tsx       line social icons
   sections/
-    Intro.tsx  Nav.tsx  Hero.tsx  Equation.tsx  Programs.tsx
+    Nav.tsx  Hero.tsx  Equation.tsx  Programs.tsx
     Albany.tsx  Girls.tsx  ClubPhotos.tsx  Help.tsx  Connect.tsx  Footer.tsx
 ```
 
@@ -155,16 +155,15 @@ src/
 full-logo moment — nav, intro end state, equation finale, footer (see
 `src/components/LogoImage.tsx`).
 
-The one thing we do recreate as SVG is the **plain outlined X**, used purely as
-a *typographic glyph* — the last letter of `SOLVING FOR X`, the mark the
-equation resolves into, the X bleeding off the footer, and the tile in the
-brand pattern. No fist, no shield. It lives in `src/components/svg/XGlyph.tsx`:
+**The X is the logo's own X.** `scripts/cut-logo-x.mjs` removes the
+home-plate shield from the client PNG (every visible piece of the shield is its
+own region of pixels) and writes `public/brand/logo-x.png` — the X with its
+raised fist — plus a padded tile for the brand pattern. `LogoX` renders it in
+the hero, the equation's answer, the help line, Albany and the footer;
+`XPattern` tiles it. No X is drawn by hand anywhere.
 
-- `variant="solid"` — thick X with the inner inline knocked out (matches the
-  PNG’s X); pass `inlineColor` to paint that inline instead (the hero uses red)
-- `variant="outline"` — hollow varsity outline (footer)
-- `variant="stroke"` — the same outline as two closed paths, so it can draw
-  itself with `stroke-dashoffset` (the Albany hard cut)
+The shield itself frames photos: `src/components/Shield.tsx` clips anything to
+the home-plate shape with the logo's double keyline (gallery, Albany).
 
 ### Animating a part of the logo
 
@@ -195,11 +194,11 @@ no hairline seam is left where the two clips meet.
 - Easing is `power3.out` / `expo.out`; stamps and slams use `back.out(2)`.
   Durations are 0.4–0.9s.
 - Only `transform`, `opacity` and `stroke-dashoffset` are animated.
-- **Reduced motion** (`prefers-reduced-motion: reduce`): the intro is skipped,
-  pinning and Ken Burns are off, and every section renders its finished state
-  with a plain fade.
-- The intro plays **once per browser-tab session** (`sessionStorage:
-  "txfb:intro-seen"`) and is skippable by click, scroll or keypress.
+- **No intro, no entrance animation** — the page opens on the finished hero.
+- Motion is kept to what carries meaning: the Equation, the Albany parallax
+  story, the gallery's slow auto-scroll, ticks drawing on the programme sheets.
+- **Reduced motion** (`prefers-reduced-motion: reduce`): no pinning, no
+  parallax, no auto-scroll; every section renders its finished state.
 
 ---
 
