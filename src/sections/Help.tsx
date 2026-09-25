@@ -151,8 +151,8 @@ export function Help() {
           {help.options.map((o, i) => (
             <div
               key={o.id}
-              /* flex-col + mt-auto on the CTA block pins it to the bottom, so
-                 all three buttons line up however long the copy above is. */
+              /* flex-col + mt-auto on the footer pins it to the bottom; the
+                 footer itself is the same height in every card. */
               className="flex flex-col border border-white/10 bg-ink/60 p-5 sm:p-6"
               onMouseEnter={() => setActive(o.id)}
               onFocus={() => setActive(o.id)}
@@ -172,32 +172,37 @@ export function Help() {
 
               <p className="mt-3 text-[0.95rem] leading-[1.5] text-grey">{o.body}</p>
 
-              {o.id === 'supplies' ? (
-                <ShipBoxArt className="mt-5 h-auto w-[58%] max-w-[220px] text-off" />
-              ) : null}
-
-              <div className="mt-auto pt-6">
-                <span data-magnetic className="inline-block will-change-transform">
-                  <a
-                    href={o.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onPointerDown={() => setActive(o.id)}
-                    className="inline-flex items-center justify-center border-2 border-red bg-red px-6 py-3.5 font-black uppercase tracking-tightest text-white transition-colors duration-200 hover:border-deepred hover:bg-deepred sm:px-7"
-                    style={{ fontSize: 'clamp(0.78rem, 1.1vw, 0.95rem)' }}
-                  >
-                    {o.title}
-                  </a>
-                </span>
+              {/*
+                Footer: helper note ABOVE the button at a fixed two-line
+                height, so all three buttons share one baseline whatever the
+                note says (ROUND-03 P1 #8). The shipping box sits beside its
+                own button instead of stretching the whole row.
+              */}
+              <div className="relative mt-auto pt-6">
+                <MonoLabel className="block min-h-[3.4em] leading-[1.7] text-grey/75">{o.note}</MonoLabel>
+                <div className="mt-3 flex items-end justify-between gap-4">
+                  <span data-magnetic className="inline-block will-change-transform">
+                    <a
+                      href={o.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onPointerDown={() => setActive(o.id)}
+                      className="inline-flex items-center justify-center border-2 border-red bg-red px-6 py-3.5 font-black uppercase tracking-tightest text-white transition-colors duration-200 hover:border-deepred hover:bg-deepred sm:px-7"
+                      style={{ fontSize: 'clamp(0.78rem, 1.1vw, 0.95rem)' }}
+                    >
+                      {o.title}
+                    </a>
+                  </span>
+                  {o.id === 'supplies' ? (
+                    <ShipBoxArt className="h-auto w-20 shrink-0 text-off sm:w-24" />
+                  ) : null}
+                </div>
+                {o.id === 'give' ? (
+                  <span className="absolute right-0 top-0">
+                    <Flag id="q-donate-paypal" place="bl" />
+                  </span>
+                ) : null}
               </div>
-
-              <MonoLabel className="mt-4 text-grey/75">{o.note}</MonoLabel>
-
-              {o.id === 'give' ? (
-                <span className="relative mt-3 block h-6">
-                  <Flag id="q-donate-paypal" place="bl" />
-                </span>
-              ) : null}
             </div>
           ))}
         </div>

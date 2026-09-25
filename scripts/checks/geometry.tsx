@@ -49,11 +49,11 @@ for (const vw of [375, 768, 1280, 1440, 1920]) {
 /* ---------- X vs cap height ---------- */
 console.log('\nHero X (ROUND-02 P0 #1: >=1.4x the cap height of line 1)');
 {
-  const X_CAPS = 1.42;
+  const X_CAPS = 2.2;
   const boxEm = X_EM_PER_CAP * X_CAPS;      // height of the glyph box, in em
   const visualX = boxEm * (100.4 / 106);    // the drawn X inside its crop
   const ratio = visualX / CAP_EM;
-  check('X stands at least 1.4x the cap height', ratio >= 1.4, `${ratio.toFixed(3)}x`);
+  check('X stands ~2.2x the cap height', ratio >= 2.15 && ratio <= 2.3, `${ratio.toFixed(3)}x`);
 }
 
 /* ---------- exploded brake ---------- */

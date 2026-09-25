@@ -122,7 +122,7 @@ export function Connect() {
           <p className="font-black uppercase tracking-tightest text-off" style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.6rem)' }}>
             {connect.follow}
           </p>
-          <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2">
+          <ul className="mt-6 grid grid-cols-1 gap-3 min-[440px]:grid-cols-2 sm:grid-cols-4 lg:grid-cols-2">
             {connect.socials.map((s) => (
               <li key={s.id}>
                 <a
@@ -133,10 +133,10 @@ export function Connect() {
                 >
                   <SocialIcon id={s.id as 'instagram'} className="h-5 w-5 shrink-0 text-off transition-colors group-hover:text-red" />
                   <span className="min-w-0">
-                    <span className="block truncate font-bold uppercase tracking-tightest text-off" style={{ fontSize: '0.72rem' }}>
+                    <span className="block [overflow-wrap:anywhere] font-bold uppercase tracking-tightest text-off" style={{ fontSize: '0.72rem' }}>
                       {s.label}
                     </span>
-                    <MonoLabel className="block truncate text-grey/75">{s.handle}</MonoLabel>
+                    <MonoLabel className="block [overflow-wrap:anywhere] text-grey/75">{s.handle}</MonoLabel>
                   </span>
                 </a>
               </li>

@@ -1,5 +1,7 @@
 # Notes from builder
 
+**Preview (round 03): https://thexforboys.vercel.app**
+
 _Builder (Arena / Claude Code) writes here at the end of each round: what changed, what couldn't be done, questions for the studio._
 
 ## Round 01
@@ -148,3 +150,152 @@ stayed.
 - `sharp` is a new devDependency, used only by `npm run preview:art`. It is
   not part of the site bundle; drop it and that one script if you'd rather
   keep install light.
+
+---
+
+## Round 03 — Finish for the pitch (Claude Code)
+
+**Preview:** https://thexforboys.vercel.app (Vercel project `thexforboys`, deployed
+from the CLI with this round's build).
+
+`npm run build` passes with zero TypeScript errors. `npm run check` passes
+(44 assertions, including 7 new round-03 ones). Every state was screenshotted
+at 1440×900 and 375×812, reviewed, fixed and re-shot. Final frames:
+`brief/screens/round-03/` (39 PNGs, regenerate with `npm run screens` after a build).
+
+### P0
+
+**1. Photos.** Swapped per the corrected map, and each one checked by eye
+before shipping: `AUTO_1` IMG_1128 (tire change on the red truck), `AUTO_2`
+IMG_1125 (boy kneeling at the tire, brake pads on the ground), `HOME_1`
+unchanged (timber beam), `READ_1` 112296745… (reading circle, open book in
+the foreground), `READ_2` 115941536… (indoor session with books). The
+Programs objects show brake/tire, beam and book club respectively.
+While looking I found that **most of the other alt text didn't match the
+photos either**, so every alt in `images.ts` was rewritten from the actual
+picture. One to know about: `SECTION_ALBANY` (`_DSC8134.JPG`) is **not a view
+of Albany**. It's the boys in a crowd at a fairground. It still works as the
+dimmed background for the Albany statistic, but see question 2 below.
+
+**2. Mobile Equation had no illustrations.** Cause: each mobile stage was a
+plain `div` whose children are all `position:absolute`, so it collapsed to
+0px tall. Each stage now has a 4:3 box, and the brake, wall and book build
+over their photo per term on scroll (no pinning).
+
+**3. Stages bleeding into each other.** Rebuilt the term sequence: stage in →
+line art builds → **the photo wipe runs for exactly the build's length**, so
+it reaches full frame on the same beat the drawing finishes (`BUILD_LENGTH`
+in `Equation.tsx`) → hold → the stage fades fully out (`autoAlpha 0`) → only
+then does the next term start. The scroll length is derived from the
+timeline (`PX_PER_SECOND`) instead of a hard-coded 4200px.
+
+**4. The finale.** The logo is now ~50vh tall on desktop (`calc(50vh × 365/418)`
+wide) and ~60vw wide on mobile. "Let's solve it together." sits directly
+under it at display size (`clamp(1.9rem, 5.2vw, 5.4rem)`), in the same
+frame. The logo holds for a beat before the pin releases. The empty band
+after it is gone: the finale centres in the visible area below the nav, and
+Programs' top padding is tighter. `03-equation-6-after-1440.png` shows the
+handoff. The travelling X now aims at the logo's own X (measured, with its
+current transform subtracted) rather than the stage centre. On mobile the "="
+leaves with the X instead of being stranded above the logo.
+
+**5. Nav progress line.** The track is an 8% off-white hairline; only the
+inner bar is red, scaling 0 → 1. Verified in `nav-top/middle/bottom-*.png`
+(empty, about half, full).
+
+**6. Logo, measured.** Downloaded the PNG (612×612, artwork at x 112–476,
+y 72–489 — matches your numbers), trimmed it to 365×418 and serve it from
+`public/brand/logo-white.png`. `LOGO_INTRINSIC = { w: 365, h: 418 }`.
+`FIST_REGION` measured from the pixels: **x 60–100%, y 0–29%**. That's the
+whole fist and its keyline, cut just below the wrist and above the shield's
+right bar (checked by cropping it out and looking). The pop now grows from
+the wrist. The first screenshots showed two more problems, both fixed:
+- A faint hairline around the fist box where the two clip-paths meet, most
+  visible while the lockup scales into the nav. After the pop lands,
+  `sealLogo()` swaps to a single unclipped image, so the seam can't exist at rest.
+- In the 0.9s frame the X sat without its fist for too long. The pop now
+  starts as the wipe reaches the top-right corner (0.8s).
+Favicons (32px, 180px apple-touch, 512px) are cut from the same PNG on an
+ink square.
+
+### P1
+
+**7. Hero X** at 2.2× the cap height of "SOLVING FOR", left-aligned with it.
+Clear of the subline at 375 and 1440. I also added a short top-down ink fade
+under the transparent nav: in this photo the sky behind the nav links is
+near-white and the links weren't legible.
+
+**8. Help CTAs.** The helper note now sits *above* each button at a fixed
+two-line height, so all three buttons share one baseline. The shipping-box
+drawing was what stretched the row and left the Donate card half empty. It
+now sits small beside its own button. The PayPal Q-flag is out of flow.
+
+**9. Self-hosted images.** `scripts/build-assets.mjs` (`npm run assets`)
+downloads each original once and writes WebP + JPEG at 1800w and 900w to
+`public/images/`, plus `src/content/image-manifest.json` with real pixel sizes.
+`Img` renders a `<picture>` with WebP and JPEG `srcset`s at their real
+widths. The outputs are committed. **No request goes to wsimg.com:** the
+screenshot script logs every off-localhost request (only Google Fonts appear),
+and `npm run check` asserts no `wsimg.com` URL exists in `src/` or `index.html`.
+
+### P2
+
+**10. Lighthouse (mobile, v12, local production build, median of 3):**
+
+| Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|
+| **72** | **96** | 100 | 100 |
+
+FCP 3.0s · LCP 4.1s · TBT 250ms · CLS 0.01. The range across runs was 48–74;
+the 48 was a single TBT spike on this machine.
+
+**Accessibility 96 meets the 95 target. Performance 72 misses 85.** What I did:
+Performance started at 39–53.
+- Below-the-fold sections are lazy chunks, mounted one per idle slot, each in
+  its own Suspense boundary. TBT went from about 600–760ms to about 250–300ms.
+- Stroke lengths are measured once and batched. Reads were interleaved with
+  writes, which forced a layout per path.
+- One `ScrollTrigger.refresh()` after load + fonts, instead of three.
+- Google Fonts CSS no longer blocks render. Added `robots.txt` (SEO 92 → 100).
+
+What's left: about 1.2s of LCP is "element render delay", which is **the
+first-visit intro covering the hero by design**. FCP waits on the
+React + GSAP bundle (about 113KB gzipped). Getting past 85 would need
+either a shorter or skippable-on-mobile intro, or a static HTML first frame
+of the hero. Both change the experience, so I'm asking rather than doing it
+(question 1).
+
+**Contrast:** the only failing audit is white text on the brand red
+`#F70303` on buttons (about 4.2:1, AA needs 4.5 below 18.66px bold). Ink on
+red fails too. It's the brand colour, so I haven't changed it (question 3).
+
+**11. Preview** is at the top of these notes.
+
+### Also changed
+- Programs: the footer line on each object ("SITE: ALBANY, GA", "BOOK CLUB —
+  WEEKLY") ran *under* the photo. It now shares a row with it. The two WEEKLY
+  stamps collided at 375; the second stamp moves over on mobile.
+- Connect: social handles were truncated with an ellipsis at 375. They now
+  stack one per row and wrap.
+- The Equation's layout switch is width-only (`min-width: 1024px`). Touch
+  laptops used to get the desktop layout with the mobile timeline.
+- Docs: README (images, logo seal, review tooling), `CLIENT_QUESTIONS.md` §2
+  (the logo file no longer blocks anything), the `LOGO FILE` Q-note.
+- New dev deps: `playwright` (screenshots). `sharp` is now also used by
+  `build-assets.mjs`.
+
+### What I need from you
+1. **Performance vs. intro:** do you accept ~72 mobile with the full first-visit
+   intro, or should the intro be shorter or skipped on phones to chase 85+?
+2. **Albany photo:** `_DSC8134.JPG` is a fairground crowd, not the city. Is
+   there a real Albany street or skyline shot, or should the section use a
+   different photo?
+3. **Red button contrast:** OK to leave white-on-`#F70303` as is (brand), or
+   enlarge button type to 18.66px+ bold so it counts as large text?
+4. **Vercel:** the project was created from the CLI and is **not Git-connected**,
+   so pushes to `main` won't redeploy on their own. Say if you want it connected.
+   Note that auto-deploying `main` would publish to the project's production
+   alias. The deploy-specific URL is behind Vercel login; the
+   `thexforboys.vercel.app` alias is public.
+5. A vector logo would still help at the finale's size on large screens (the
+   PNG artwork is only 365×418).

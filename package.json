@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "preview:art": "node scripts/run-preview-art.mjs",
-    "check": "node scripts/run-check.mjs"
+    "check": "node scripts/run-check.mjs",
+    "screens": "node scripts/screens.mjs",
+    "assets": "node scripts/build-assets.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
@@ -24,6 +26,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.6.1",
     "esbuild": "^0.21.5",
+    "playwright": "^1.63.0",
     "postcss": "^8.5.28",
     "sharp": "^0.35.4",
     "tailwindcss": "^3.4.19",

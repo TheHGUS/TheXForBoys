@@ -14,16 +14,16 @@ import { scrollToId } from '../lib/scroll';
  * HERO
  * Full-bleed photograph with a single bottom-up ink gradient behind the copy —
  * no full-frame wash, so the kids' faces stay bright. "SOLVING FOR" on line 1,
- * the outlined varsity X on line 2 at 1.42x line 1's cap height, so the X
- * reads as the payoff rather than a punctuation mark.
+ * the outlined varsity X on line 2 at 2.2x line 1's cap height, left-aligned
+ * with it, so the X reads as the answer rather than an icon (ROUND-03 P1 #7).
  */
 
 /**
  * How tall the X stands, in multiples of the headline's cap height.
  * Libre Franklin's cap height is 0.742em (measured off the real 900-weight
- * TTF). ROUND-02 asks for at least 1.4x — 1.42 leaves a little margin.
+ * TTF). ROUND-03 asks for ~2.2x.
  */
-const X_CAPS = 1.42;
+const X_CAPS = 2.2;
 
 export function Hero({ ready }: { ready: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
@@ -97,8 +97,8 @@ export function Hero({ ready }: { ready: boolean }) {
       </div>
 
       {/*
-        The only darkening on the page: one bottom-up ink gradient behind the
-        copy. The upper two-thirds of the frame is left completely alone.
+        One bottom-up ink gradient behind the copy. Apart from the short fade
+        under the nav, the upper two-thirds of the frame is left alone.
       */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[65%]"
@@ -106,6 +106,16 @@ export function Hero({ ready }: { ready: boolean }) {
           background:
             'linear-gradient(to top, #161616 0%, rgba(22,22,22,0.78) 32%, rgba(22,22,22,0.34) 62%, rgba(22,22,22,0) 100%)',
         }}
+        aria-hidden="true"
+      />
+
+      {/*
+        A short top-down ink fade under the transparent nav: the sky in this
+        photo is near-white, and the nav links need AA contrast against it.
+      */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[150px]"
+        style={{ background: 'linear-gradient(to bottom, rgba(22,22,22,0.72) 0%, rgba(22,22,22,0) 100%)' }}
         aria-hidden="true"
       />
 

@@ -18,8 +18,9 @@ type ImgProps = {
 };
 
 /**
- * Every photo on the site goes through here: intrinsic width/height are always
- * set, object-fit is cover, and everything except the hero lazy-loads.
+ * Every photo on the site goes through here: WebP with a JPEG fallback, real
+ * intrinsic width/height, object-fit cover, and everything except the hero
+ * lazy-loads. `<picture>` is display:contents so it never affects layout.
  */
 export function Img({
   image,
@@ -31,19 +32,22 @@ export function Img({
   wrapperClassName,
 }: ImgProps) {
   const img = (
-    <img
-      src={image.src}
-      srcSet={`${image.srcSmall} 900w, ${image.src} 1800w`}
-      sizes={sizes}
-      alt={image.alt}
-      width={image.w}
-      height={image.h}
-      loading={priority ? 'eager' : 'lazy'}
-      decoding={priority ? 'sync' : 'async'}
-      {...{ fetchpriority: priority ? 'high' : 'auto' }}
-      className={`h-full w-full object-cover ${imgClassName ?? ''}`}
-      draggable={false}
-    />
+    <picture className="contents">
+      <source type="image/webp" srcSet={image.webpSet} sizes={sizes} />
+      <img
+        src={image.src}
+        srcSet={image.srcSet}
+        sizes={sizes}
+        alt={image.alt}
+        width={image.w}
+        height={image.h}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding={priority ? 'sync' : 'async'}
+        {...{ fetchpriority: priority ? 'high' : 'auto' }}
+        className={`h-full w-full object-cover ${imgClassName ?? ''}`}
+        draggable={false}
+      />
+    </picture>
   );
   if (wrapperClassName || className) {
     return (

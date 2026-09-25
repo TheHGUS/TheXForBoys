@@ -75,8 +75,8 @@ check(
     const html = [Nav, Help, Equation, Footer]
       .map((C) => (C === Nav ? renderToStaticMarkup(<Nav logoRef={createRef<HTMLSpanElement>()} />) : renderToStaticMarkup(<C />)))
       .join('');
-    const png = 'The%20X%20for%20boys%20logo%2004-02%20WHITE.png';
-    return html.includes(png);
+    // round 03: the client's PNG, trimmed and self-hosted (scripts/build-assets.mjs)
+    return html.includes('/brand/logo-white.png');
   })(),
 );
 check(
@@ -187,6 +187,52 @@ check('decorative SVGs are hidden from screen readers', (() => {
 })());
 
 /* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+section('ROUND-03 — self-hosted assets, measured logo, nav track');
+{
+  const indexHtml = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+  check('no wsimg.com URL in src/ or index.html', !/wsimg\.com/.test(allSrc) && !/wsimg\.com/.test(indexHtml));
+  const manifest = JSON.parse(readFileSync(join(SRC, 'content', 'image-manifest.json'), 'utf8')) as Record<
+    string,
+    { slug: string; sizes: { name: number }[] }
+  >;
+  const missing: string[] = [];
+  for (const e of Object.values(manifest))
+    for (const sz of e.sizes)
+      for (const ext of ['webp', 'jpg'])
+        try {
+          statSync(join(process.cwd(), 'public', 'images', `${e.slug}-${sz.name}.${ext}`));
+        } catch {
+          missing.push(`${e.slug}-${sz.name}.${ext}`);
+        }
+  check('every photo has WebP + JPEG at both widths in public/images', missing.length === 0, missing.join(', '));
+  check('trimmed logo + favicon are self-hosted', (() => {
+    try {
+      statSync(join(process.cwd(), 'public', 'brand', 'logo-white.png'));
+      statSync(join(process.cwd(), 'public', 'favicon-32.png'));
+      return /href="\/favicon-32\.png"/.test(indexHtml);
+    } catch {
+      return false;
+    }
+  })());
+  const imagesSrc = sources.get(join(SRC, 'content', 'images.ts')) ?? '';
+  check('program photos match ROUND-03 P0 #1', [
+    /AUTO_1 = img\('IMG_1128\.jpg'/,
+    /AUTO_2 = img\('IMG_1125\.jpg'/,
+    /HOME_1 = img\('107490527_747809919368645_6947944466898993638_\.jpg'/,
+    /READ_1 = img\('112296745_2672695399669168_4236440098798381834\.jpg'/,
+    /READ_2 = img\('115941536_1928831703917630_8727889694125410655\.jpg'/,
+  ].every((re) => re.test(imagesSrc)));
+  check('LOGO_INTRINSIC is the measured 365×418', /LOGO_INTRINSIC = \{ w: 365, h: 418 \}/.test(imagesSrc));
+  const navSrc = sources.get(join(SRC, 'sections', 'Nav.tsx')) ?? '';
+  check(
+    'nav progress track is not red (only the inner bar is)',
+    /bottom-0 block h-\[2px\] bg-off\/\[0\.08\]/.test(navSrc),
+  );
+  const heroSrc = sources.get(join(SRC, 'sections', 'Hero.tsx')) ?? '';
+  check('hero X is ~2.2x the cap height', /const X_CAPS = 2\.2;/.test(heroSrc));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) {
   console.log('failing:', failures.join(' | '));

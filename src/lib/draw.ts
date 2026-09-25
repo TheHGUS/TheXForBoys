@@ -9,7 +9,23 @@ function toEls(t: DrawTarget): SVGGeometryElement[] {
   return arr.filter(Boolean) as SVGGeometryElement[];
 }
 
+/**
+ * Path lengths never change after mount, so each is measured once. Measuring
+ * forces style/layout, and interleaving those reads with the dash writes
+ * below turned every stroke on the page into its own forced layout
+ * (Lighthouse round 03: ~3.4s of style/layout on a throttled phone).
+ */
+const LENGTHS = new WeakMap<Element, number>();
+
 export function lengthOf(el: SVGGeometryElement): number {
+  const hit = LENGTHS.get(el);
+  if (hit !== undefined) return hit;
+  const len = measure(el);
+  LENGTHS.set(el, len);
+  return len;
+}
+
+function measure(el: SVGGeometryElement): number {
   const anyEl = el as SVGGeometryElement & { getTotalLength?: () => number };
   if (typeof anyEl.getTotalLength === 'function') {
     try {
@@ -34,7 +50,11 @@ export function prepStroke(el: SVGGeometryElement, reverse = false): number {
 
 export function prepStrokes(targets: DrawTarget, reverse = false): SVGGeometryElement[] {
   const els = toEls(targets);
-  els.forEach((el) => prepStroke(el, reverse));
+  // all reads first, then all writes — one layout, not one per path
+  const lens = els.map((el) => lengthOf(el));
+  els.forEach((el, i) => {
+    if (lens[i]) gsap.set(el, { strokeDasharray: lens[i], strokeDashoffset: reverse ? 0 : lens[i] });
+  });
   return els;
 }
 

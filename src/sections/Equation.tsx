@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '../lib/gsap';
 import { drawOn, prepStrokes } from '../lib/draw';
-import { useIsDesktop, useReducedMotion } from '../lib/motion';
+import { useMediaQuery, useReducedMotion } from '../lib/motion';
 import { XPattern } from '../components/XPattern';
 import { Flag } from '../components/Flag';
-import { LogoLockupSplit } from '../components/LogoImage';
+import { LogoLockupSplit, sealLogo } from '../components/LogoImage';
+import { LOGO_INTRINSIC } from '../content/images';
 import { XGlyph } from '../components/svg/XGlyph';
 import { Img } from '../components/ui';
 import {
@@ -38,11 +39,22 @@ import { equation } from '../content/copy';
 const PHOTOS = [AUTO_1, HOME_1, READ_1] as const;
 
 /**
- * How much of the logo lockup's height its X occupies. Used to land the
- * travelling glyph on the same size as the X inside the real PNG. This is an
- * estimate — NOTES_FROM_BUILDER.md asks for the vector so it can be exact.
+ * How much of the logo lockup's height its X occupies, measured off the
+ * trimmed PNG (the X runs from ~10% to ~88% of the artwork's height). Used to
+ * land the travelling glyph on the same size as the X inside the real logo.
  */
 const LOGO_X_RATIO = 0.78;
+
+/** Scroll distance per second of master-timeline time (desktop pin). */
+const PX_PER_SECOND = 330;
+
+/**
+ * How long each illustration takes to finish drawing, measured from the
+ * build's start (the last tween in each build function below ends here).
+ * The photograph's wipe is given exactly this long, so it reaches full frame
+ * on the same beat the line art completes (ROUND-03 P0 #3).
+ */
+const BUILD_LENGTH = [2.05, 3.1, 2.15] as const;
 
 /* -------------------------------------------------------------------------- */
 /*  Per-term build animations. Each is added to the parent timeline.            */
@@ -130,34 +142,51 @@ function readingBuild(tl: gsap.core.Timeline, root: HTMLElement, at: number): vo
 }
 
 /** Wipe the photograph in behind the line art, in sync with the drawing. */
-function photoReveal(tl: gsap.core.Timeline, root: HTMLElement, at: number, duration = 1): void {
+function photoReveal(tl: gsap.core.Timeline, root: HTMLElement, at: number, duration: number): void {
   const photo = root.querySelector('.photo');
   if (!photo) return;
   tl.fromTo(
     photo,
     { clipPath: 'inset(0% 100% 0% 0%)' },
-    { clipPath: 'inset(0% 0% 0% 0%)', duration, ease: 'power3.inOut' },
+    { clipPath: 'inset(0% 0% 0% 0%)', duration, ease: 'power2.inOut' },
     at,
   );
 }
 
+/** Build one term's illustration and wipe its photo in over the same span. */
+function buildStage(tl: gsap.core.Timeline, stage: HTMLElement, term: 0 | 1 | 2, at: number): number {
+  if (term === 0) automotiveBuild(tl, stage, at);
+  else if (term === 1) homeBuild(tl, stage, at);
+  else readingBuild(tl, stage, at);
+  photoReveal(tl, stage, at, BUILD_LENGTH[term]);
+  return at + BUILD_LENGTH[term];
+}
+
 /* -------------------------------------------------------------------------- */
-/*  One term: [ ? ] -> scrawl -> type -> build -> out                          */
+/*  One term: [ ? ] -> scrawl -> type -> build -> hold -> out                  */
 /* -------------------------------------------------------------------------- */
 
+type TermTimes = { settled: number; next: number };
+
+/**
+ * Stages never overlap: each one is fully built, held, and fully faded out
+ * (autoAlpha 0) before the next term's scrawl starts. `settled` is the
+ * moment its illustration and photo are complete — the still frame the
+ * studio reviews.
+ */
 function termTimeline(
   tl: gsap.core.Timeline,
   row: HTMLElement,
   stages: HTMLElement | null,
   term: 0 | 1 | 2,
   at: number,
-): number {
+): TermTimes {
   const slot = row.querySelector<HTMLElement>(`[data-slot="${term}"]`);
   const word = row.querySelector<HTMLElement>(`[data-word="${term}"]`);
   const ph = row.querySelector<HTMLElement>(`[data-ph="${term}"]`);
   const scribble = row.querySelector<SVGSVGElement>(`[data-scribble="${term}"]`);
   const stage = stages?.querySelector<HTMLElement>(`[data-stage="${term}"]`) ?? null;
-  if (!slot || !word || !scribble) return at;
+  if (!slot || !word || !scribble) return { settled: at, next: at };
 
   const paths = scribble.querySelectorAll('path');
   prepStrokes(paths);
@@ -175,25 +204,17 @@ function termTimeline(
     at + 0.66,
   );
 
-  // 3. the stage: illustration builds, photograph wipes in behind it
-  if (stage) {
-    tl.set(stage, { autoAlpha: 1 }, at + 0.15);
-    const stageAt = at + 0.55;
-    if (term === 0) {
-      automotiveBuild(tl, stage, stageAt);
-      photoReveal(tl, stage, stageAt + 0.2, 1.1);
-    } else if (term === 1) {
-      homeBuild(tl, stage, stageAt);
-      photoReveal(tl, stage, stageAt + 1.95, 1.15);
-    } else {
-      readingBuild(tl, stage, stageAt);
-      photoReveal(tl, stage, stageAt + 0.2, 1.1);
-    }
-    // 4. out
-    tl.to(stage, { autoAlpha: 0, duration: 0.45, ease: 'power2.inOut' }, at + 2.6);
-  }
+  if (!stage) return { settled: at + 1.3, next: at + 1.3 };
 
-  return at + 2.75;
+  // 3. stage in, illustration builds, photograph wipes in over the same span
+  const inAt = at + 0.35;
+  tl.fromTo(stage, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25, ease: 'power2.out', immediateRender: false }, inAt);
+  const settled = buildStage(tl, stage, term, inAt + 0.1);
+
+  // 4. hold the finished frame, then fully out before anything else enters
+  const outAt = settled + 0.9;
+  tl.to(stage, { autoAlpha: 0, duration: 0.4, ease: 'power2.in' }, outAt);
+  return { settled, next: outAt + 0.45 };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -204,7 +225,10 @@ export function Equation() {
   const rowRef = useRef<HTMLDivElement>(null);
   const stagesRef = useRef<HTMLDivElement>(null);
   const finaleRef = useRef<HTMLDivElement>(null);
-  const isDesktop = useIsDesktop();
+  // Width alone decides the layout: the pinned stage is a desktop-width
+  // composition, whatever the pointer. (Gating on `pointer: fine` left touch
+  // laptops with the desktop layout but the mobile timeline.)
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const reduced = useReducedMotion();
 
   useEffect(() => {
@@ -224,7 +248,7 @@ export function Equation() {
       const scribbles = gsap.utils.toArray<HTMLElement>('[data-scribble]', root);
       const words = gsap.utils.toArray<HTMLElement>('[data-word]', root);
       const phs = gsap.utils.toArray<HTMLElement>('[data-ph]', root);
-      const finaleMark = finale.querySelector('.finale-mark');
+      const finaleMark = finale.querySelector<HTMLElement>('.finale-mark');
       const caption = finale.querySelector('.finale-caption');
 
       /* ---------- reduced motion: finished state, no pinning ---------- */
@@ -232,7 +256,11 @@ export function Equation() {
         gsap.set(scribbles, { opacity: 0 });
         gsap.set(phs, { opacity: 0 });
         gsap.set(words, { opacity: 1 });
-        gsap.set(allStages, { autoAlpha: 0 });
+        gsap.set(ops, { opacity: 1 });
+        if (equals) gsap.set(equals, { opacity: 1 });
+        // desktop hides the stages (the finale follows the row in flow);
+        // mobile shows each finished illustration under its term
+        gsap.set(allStages, { autoAlpha: isDesktop ? 0 : 1 });
         gsap.set(finale, { autoAlpha: 1 });
         return;
       }
@@ -242,7 +270,6 @@ export function Equation() {
         gsap.set(scribbles, { opacity: 1 });
         gsap.set(words, { opacity: 0 });
         gsap.set(finale, { autoAlpha: 1 });
-        gsap.set(finale.querySelectorAll('.finale-mark, .finale-caption'), { opacity: 0 });
 
         [0, 1, 2].forEach((i) => {
           const block = root.querySelector<HTMLElement>(`[data-block="${i}"]`);
@@ -276,25 +303,26 @@ export function Equation() {
       gsap.set(finale, { autoAlpha: 0 });
 
       const master = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      /** Named still frames, in timeline seconds — published for scripts/screens.mjs. */
+      const marks: Record<string, number> = {};
 
-      let t = 0.15;
-      t = termTimeline(master, row, stages, 0, t);
-      master.to(ops[0], { opacity: 1, duration: 0.3 }, t - 0.6);
-      t = termTimeline(master, row, stages, 1, t);
-      master.to(ops[1], { opacity: 1, duration: 0.3 }, t - 0.6);
-      t = termTimeline(master, row, stages, 2, t);
-      if (equals) master.to(equals, { opacity: 1, duration: 0.3 }, t - 0.5);
+      const a = termTimeline(master, row, stages, 0, 0.15);
+      marks.auto = a.settled + 0.3;
+      master.to(ops[0], { opacity: 1, duration: 0.3 }, a.next - 0.3);
+      const h = termTimeline(master, row, stages, 1, a.next);
+      marks.home = h.settled + 0.3;
+      master.to(ops[1], { opacity: 1, duration: 0.3 }, h.next - 0.3);
+      const r = termTimeline(master, row, stages, 2, h.next);
+      marks.reading = r.settled + 0.3;
+      if (equals) master.to(equals, { opacity: 1, duration: 0.3 }, r.next - 0.3);
 
       /*
-       * COLLAPSE -> the "= X" glyph travels to centre and BECOMES the logo.
-       * Function-based values so a font/layout refresh can never leave the
-       * move pointing at stale coordinates.
+       * COLLAPSE -> the "= X" glyph travels to the logo's X and BECOMES the
+       * logo. Positions are measured against the finale mark itself, with the
+       * glyph's own current transform taken out, so a refresh mid-scrub can
+       * never aim the move at stale coordinates.
        */
-      const collapseAt = t + 0.25;
-      const centre = () => {
-        const r = pin.getBoundingClientRect();
-        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-      };
+      const collapseAt = r.next + 0.25;
 
       // the operators and the "=" drop away; the terms fade where they stand
       master.to([...ops, equals].filter(Boolean) as Element[], { opacity: 0, duration: 0.4 }, collapseAt);
@@ -303,28 +331,34 @@ export function Equation() {
         master.to(el, { opacity: 0, duration: 0.5, ease: 'power2.in' }, collapseAt + 0.05);
       });
 
-      if (result) {
-        const logoH = () => (finaleMark?.getBoundingClientRect().height ?? 0) || 1;
+      if (result && finaleMark) {
+        const measure = () => {
+          const g = result.getBoundingClientRect();
+          const gx = Number(gsap.getProperty(result, 'x')) || 0;
+          const gy = Number(gsap.getProperty(result, 'y')) || 0;
+          const gs = Number(gsap.getProperty(result, 'scale')) || 1;
+          const m = finaleMark.getBoundingClientRect();
+          // the logo's X is centred horizontally; vertically it spans ~10–88%
+          const tx = m.left + m.width / 2;
+          const ty = m.top + m.height * 0.49;
+          return {
+            x: tx - (g.left + g.width / 2 - gx),
+            y: ty - (g.top + g.height / 2 - gy),
+            scale: (m.height * LOGO_X_RATIO) / (g.height / gs || 1),
+          };
+        };
         master.to(
           result,
           {
-            x: () => {
-              const r = result.getBoundingClientRect();
-              return centre().x - (r.left + r.width / 2);
-            },
-            y: () => {
-              const r = result.getBoundingClientRect();
-              return centre().y - (r.top + r.height / 2);
-            },
-            scale: () => {
-              const from = result.getBoundingClientRect().height || 1;
-              return (logoH() * LOGO_X_RATIO) / from;
-            },
+            x: () => measure().x,
+            y: () => measure().y,
+            scale: () => measure().scale,
             duration: 0.95,
             ease: 'power3.inOut',
           },
           collapseAt + 0.15,
         );
+        marks.collapse = collapseAt + 0.4;
       }
 
       // hand over: the real PNG mask-wipes in over the travelling glyph, then
@@ -344,7 +378,8 @@ export function Equation() {
         { scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(2)' },
         landAt + 0.42,
       );
-      if (result) master.to(result, { opacity: 0, duration: 0.25, ease: 'power2.in' }, landAt + 0.3);
+      sealLogo(master, finale, landAt + 0.9);
+      if (result) master.to(result, { opacity: 0, duration: 0.25, ease: 'power2.in' }, landAt + 0.05);
 
       // 4px camera shake at the moment of impact
       master.fromTo(
@@ -377,27 +412,45 @@ export function Equation() {
       if (caption) {
         master.fromTo(
           caption,
-          { opacity: 0, y: 18 },
-          { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
+          { opacity: 0, yPercent: 40 },
+          { opacity: 1, yPercent: 0, duration: 0.5, ease: 'expo.out' },
           landAt + 0.6,
         );
       }
 
+      // hold the finished logo on screen for a beat before the pin lets go
+      marks.logo = landAt + 1.4;
+      master.to({}, { duration: 1 }, landAt + 1.1);
+
       ScrollTrigger.create({
         trigger: root,
         start: 'top top',
-        end: '+=4200',
+        end: () => `+=${Math.round(master.duration() * PX_PER_SECOND)}`,
         pin: pin,
         pinSpacing: true,
         anticipatePin: 1,
         scrub: 0.5,
         animation: master,
         invalidateOnRefresh: true,
+        onRefresh: (self) => {
+          const d = master.duration();
+          const out: Record<string, number> = { end: Math.round(self.end) };
+          for (const [k, v] of Object.entries(marks)) {
+            out[k] = Math.round(self.start + (v / d) * (self.end - self.start));
+          }
+          root.dataset.states = JSON.stringify(out);
+        },
       });
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      delete root.dataset.states;
+      ctx.revert();
+    };
   }, [isDesktop, reduced]);
+
+  /** Desktop pins the stage; reduced motion lays everything out in flow. */
+  const pinned = !reduced;
 
   return (
     <section
@@ -410,7 +463,12 @@ export function Equation() {
         <XPattern opacity={0.05} size={140} fillClassName="xp-fill" />
       </div>
 
-      <div ref={pinRef} className="equation-shake relative w-full overflow-hidden lg:h-[100svh] lg:min-h-[640px]">
+      <div
+        ref={pinRef}
+        className={`equation-shake relative w-full overflow-hidden ${
+          pinned ? 'lg:h-[100svh] lg:min-h-[640px]' : ''
+        }`}
+      >
         {/* ---------------- EQUATION BAND (top ~30%, always legible) ---------------- */}
         <div className="relative z-20 flex w-full justify-center px-5 pt-16 sm:px-8 lg:h-[30%] lg:min-h-[190px] lg:items-center lg:px-14 lg:pt-0">
           <div
@@ -440,7 +498,7 @@ export function Equation() {
             >
               {equation.equals}
             </span>
-            {/* the one and only X — it travels to centre and becomes the logo */}
+            {/* the one and only X — it travels to the logo and becomes it */}
             <span
               data-result
               className="inline-block shrink-0"
@@ -454,7 +512,7 @@ export function Equation() {
         {/* ---------------- ILLUSTRATION STAGE (below the band) ---------------- */}
         <div
           ref={stagesRef}
-          className="relative z-10 hidden lg:block lg:h-[70%] lg:min-h-[380px]"
+          className={`relative z-10 hidden lg:h-[70%] lg:min-h-[380px] ${pinned ? 'lg:block' : ''}`}
         >
           {/*
             The inner wrapper is in normal flow so it fills the *content* box —
@@ -476,7 +534,12 @@ export function Equation() {
             <div key={i} data-block={i} className="border-b border-white/10 px-5 py-12">
               <div className="mx-auto w-full max-w-md">
                 <TermSlot index={i} label={equation.terms[i].label} block />
-                <div data-stage={i} className="mt-8">
+                {/*
+                  The stage needs a real box: its photo and line art are all
+                  absolutely positioned, so without an aspect ratio it
+                  collapsed to 0px tall and nothing rendered (ROUND-03 P0 #2).
+                */}
+                <div data-stage={i} className="relative mt-8 aspect-[4/3] w-full">
                   <StageArt index={i} />
                 </div>
               </div>
@@ -487,11 +550,15 @@ export function Equation() {
         {/* ---------------- FINALE ---------------- */}
         <div
           ref={finaleRef}
-          className="relative z-30 flex flex-col items-center px-6 py-16 text-center lg:absolute lg:inset-0 lg:justify-center lg:py-0"
+          className={`equation-finale relative z-30 flex flex-col items-center px-6 pb-16 pt-12 text-center ${
+            // pt = nav height, so the lockup centres in the visible frame
+            pinned ? 'lg:absolute lg:inset-0 lg:justify-center lg:pb-0 lg:pt-[68px]' : 'lg:py-20'
+          }`}
         >
           {/* mobile: the "= X" the travelling glyph starts from */}
-          <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
+          <div className="mb-6 flex items-center justify-center gap-3 lg:hidden">
             <span
+              data-equals-mobile
               className="font-black leading-none text-grey"
               style={{ fontSize: 'clamp(1.2rem, 5vw, 2rem)' }}
               aria-hidden="true"
@@ -507,17 +574,19 @@ export function Equation() {
             </span>
           </div>
 
+          {/* the peak of the page: ~50vh tall on desktop, ~60vw wide on mobile */}
           <LogoLockupSplit
-            className="finale-mark h-[34vmin] w-[28.4vmin] lg:h-[42vmin] lg:w-[35.1vmin]"
+            className="finale-mark"
+            style={{ width: 'var(--finale-w)', aspectRatio: `${LOGO_INTRINSIC.w} / ${LOGO_INTRINSIC.h}` }}
             label="The “X” for Boys"
           />
-          <p
-            className="finale-caption mt-6 font-black uppercase tracking-tightest text-off sm:mt-8"
-            style={{ fontSize: 'clamp(1.1rem, 3vw, 2.2rem)' }}
-          >
-            {equation.caption}
-          </p>
-          <div className="relative mt-2 hidden lg:block">
+          <div className="relative">
+            <p
+              className="finale-caption display mt-5 text-off lg:mt-7"
+              style={{ fontSize: 'clamp(1.9rem, 5.2vw, 5.4rem)' }}
+            >
+              {equation.caption}
+            </p>
             <Flag id="q-equation-caption" place="tr" />
           </div>
         </div>
@@ -642,17 +711,7 @@ function termTimelineMobile(tl: gsap.core.Timeline, block: HTMLElement, term: 0 
   if (ph) tl.to(ph, { opacity: 0, duration: 0.28 }, 0.6);
   if (word) tl.fromTo(word, { opacity: 0, yPercent: 45 }, { opacity: 1, yPercent: 0, duration: 0.5, ease: 'expo.out' }, 0.66);
 
-  if (!stage) return;
-  if (term === 0) {
-    automotiveBuild(tl, stage, 0.5);
-    photoReveal(tl, stage, 0.7, 0.9);
-  } else if (term === 1) {
-    homeBuild(tl, stage, 0.5);
-    photoReveal(tl, stage, 2.45, 1.15);
-  } else {
-    readingBuild(tl, stage, 0.5);
-    photoReveal(tl, stage, 0.7, 0.9);
-  }
+  if (stage) buildStage(tl, stage, term, 0.5);
 }
 
 /**
@@ -676,9 +735,13 @@ function mobileFinale(tl: gsap.core.Timeline, finale: HTMLElement): void {
           const g = glyph.getBoundingClientRect();
           const m = mark?.getBoundingClientRect();
           if (!m) return 0;
-          return m.top + m.height * 0.36 - (g.top + g.height / 2);
+          return m.top + m.height * 0.49 - (g.top + g.height / 2);
         },
-        scale: 1.35,
+        scale: () => {
+          const g = glyph.getBoundingClientRect();
+          const m = mark?.getBoundingClientRect();
+          return m && g.height ? (m.height * LOGO_X_RATIO) / g.height : 1;
+        },
         duration: 0.8,
         ease: 'power3.inOut',
       },
@@ -694,7 +757,11 @@ function mobileFinale(tl: gsap.core.Timeline, finale: HTMLElement): void {
     0.55,
   );
   tl.fromTo(fist ?? mark, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(2)' }, 0.97);
-  if (glyph) tl.to(glyph, { opacity: 0, duration: 0.25 }, 0.85);
+  sealLogo(tl, finale, 1.45);
+  if (glyph) tl.to(glyph, { opacity: 0, duration: 0.22, ease: 'power2.in' }, 0.55);
+  // the "=" goes with the X — nothing is left stranded above the logo
+  const eq = finale.querySelector('[data-equals-mobile]');
+  if (eq) tl.to(eq, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.3);
   if (caption) tl.fromTo(caption, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, 1.15);
 }
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { gsap } from '../lib/gsap';
 import { drawOn } from '../lib/draw';
-import { LogoLockupSplit } from '../components/LogoImage';
+import { LogoLockupSplit, sealLogo } from '../components/LogoImage';
 import { RoughXStrokes } from '../components/svg/Marker';
 import { XPattern } from '../components/XPattern';
 import { lockScroll, unlockScroll } from '../lib/scroll';
@@ -82,9 +82,12 @@ export function Intro({
       tl.to(baseWrap, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power3.inOut' }, 0.56);
       tl.to(strokesWrap, { opacity: 0, duration: 0.24, ease: 'power2.in' }, 0.62);
 
-      // 3. the fist region pops, with a short overshoot
-      tl.to(fist, { opacity: 1, duration: 0.18, ease: 'none' }, 0.92);
-      tl.to(fist, { scale: 1, duration: 0.42, ease: 'back.out(2)' }, 0.92);
+      // 3. the fist region pops, with a short overshoot, timed to land as the
+      //    wipe reaches the top-right corner — so the arm is never seen
+      //    without its fist for more than a couple of frames
+      tl.to(fist, { opacity: 1, duration: 0.1, ease: 'none' }, 0.8);
+      tl.to(fist, { scale: 1, duration: 0.42, ease: 'back.out(2)' }, 0.8);
+      sealLogo(tl, root, 1.24);
       tl.to(tag, { opacity: 1, y: 0, duration: 0.3 }, 1.12);
 
       // 4. the hero starts revealing while the mark flies home
@@ -135,6 +138,8 @@ export function Intro({
           gsap.set(lockup, { opacity: 1 });
           gsap.set(baseWrap, { clipPath: 'inset(0% 0% 0% 0%)' });
           gsap.set(fist, { opacity: 1, scale: 1 });
+          const sealed = gsap.timeline();
+          sealLogo(sealed, root, 0);
           gsap.set(tag, { opacity: 0 });
           runFlip(0.34);
         }
@@ -177,7 +182,7 @@ export function Intro({
       <div
         ref={markRef}
         className="relative"
-        style={{ width: 'min(46vmin, 300px)', aspectRatio: '132 / 158' }}
+        style={{ width: 'min(46vmin, 300px)', aspectRatio: '365 / 418' }}
       >
         <RoughXStrokes
           className="intro-strokes absolute inset-0 h-full w-full text-red"

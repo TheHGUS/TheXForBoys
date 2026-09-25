@@ -15,15 +15,16 @@ import { LOGO_PNG, LOGO_INTRINSIC } from '../content/images';
  */
 
 /**
- * The fist region, as percentages of the lockup box.
+ * The fist region, as percentages of the trimmed lockup (365×418 px).
  *
- * The fist breaks out of the top-right arm of the X, so it lives in the
- * top-right of the artwork. These numbers come from the proportions in the
- * client's own lockup (see brief/PROJECT_BRIEF.md) — they are an estimate, and
- * `brief/NOTES_FROM_BUILDER.md` asks the studio to confirm them or send a
- * vector so this can be exact.
+ * Measured from the real pixels in round 03 (scripts/build-assets.mjs trims
+ * the PNG; the region was checked by cropping it out and looking at it):
+ *   x 219–365 px (60–100%), y 0–121 px (0–29%).
+ * That box holds the whole fist including its black-and-white keyline and
+ * cuts across the forearm just below the wrist, above the top of the shield's
+ * right-hand bar — so no knuckle is clipped and no shield is dragged along.
  */
-export const FIST_REGION = { top: 3, right: 12, bottom: 62, left: 50 } as const;
+export const FIST_REGION = { top: 0, right: 0, bottom: 71, left: 60 } as const;
 
 /**
  * Everything except the fist, as one concave polygon. Clip-path polygons can
@@ -44,10 +45,11 @@ export const FIST_CLIP = `polygon(${FIST_REGION.left}% ${FIST_REGION.top}%, ${
   FIST_REGION.left
 }% ${100 - FIST_REGION.bottom}%)`;
 
-/** Centre of the fist region — the transform-origin for the pop. */
-export const FIST_ORIGIN = `${(FIST_REGION.left + (100 - FIST_REGION.right)) / 2}% ${
-  (FIST_REGION.top + (100 - FIST_REGION.bottom)) / 2
-}%`;
+/**
+ * Transform-origin for the pop: the wrist, on the cut line (≈68% x, 29% y) —
+ * so the fist punches up out of the arm instead of shrinking to a point.
+ */
+export const FIST_ORIGIN = '68% 29%';
 
 type LogoProps = {
   className?: string;
@@ -131,6 +133,22 @@ export function LogoLockupSplit({ className, style, label = '' }: LogoProps) {
       </span>
     </span>
   );
+}
+
+/**
+ * Once the fist has popped, hand over to ONE unclipped image: the base layer
+ * drops its cut-out and the fist layer hides. Two clip-paths meeting on a
+ * sub-pixel edge leave a faint hairline around the fist box (visible in the
+ * round-03 screenshots, especially while the lockup is being scaled), so the
+ * split only exists for as long as the pop itself. Timeline `set`s, so a
+ * scrubbed timeline un-seals itself on the way back.
+ */
+export function sealLogo(tl: gsap.core.Timeline, root: Element, at: number): void {
+  const base = root.querySelector('.logo-base');
+  const fist = root.querySelector('.logo-fist-wrap');
+  if (!base || !fist) return;
+  tl.set(base, { clipPath: 'none' }, at);
+  tl.set(fist, { autoAlpha: 0 }, at);
 }
 
 export default LogoImage;

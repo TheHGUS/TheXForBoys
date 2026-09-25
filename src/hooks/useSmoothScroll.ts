@@ -57,13 +57,19 @@ export function useSmoothScroll(enabled = true): void {
 /** Recalculate ScrollTriggers once fonts + images have settled. */
 export function useScrollTriggerRefresh(): void {
   useEffect(() => {
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener('load', refresh);
-    if (document.fonts?.ready) void document.fonts.ready.then(refresh);
-    const t = window.setTimeout(refresh, 1200);
-    return () => {
-      window.removeEventListener('load', refresh);
+    // One refresh once fonts AND load have both settled (each refresh
+    // re-measures every trigger on the page — three of them on a phone was
+    // a measurable chunk of main-thread time).
+    let t = 0;
+    const refresh = () => {
       window.clearTimeout(t);
+      t = window.setTimeout(() => ScrollTrigger.refresh(), 150);
     };
+    const loaded =
+      document.readyState === 'complete'
+        ? Promise.resolve()
+        : new Promise<void>((r) => window.addEventListener('load', () => r(), { once: true }));
+    void Promise.all([loaded, document.fonts?.ready ?? Promise.resolve()]).then(refresh);
+    return () => window.clearTimeout(t);
   }, []);
 }

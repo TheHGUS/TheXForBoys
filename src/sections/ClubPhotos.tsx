@@ -402,14 +402,19 @@ function Lightbox({
       </div>
 
       <div className="relative flex flex-1 items-center justify-center px-5 pb-4 sm:px-8">
-        <img
-          src={image.src}
-          alt={image.alt}
-          width={image.w}
-          height={image.h}
-          className="max-h-full max-w-full object-contain"
-          decoding="async"
-        />
+        <picture className="contents">
+          <source type="image/webp" srcSet={image.webpSet} sizes="100vw" />
+          <img
+            src={image.src}
+            srcSet={image.srcSet}
+            sizes="100vw"
+            alt={image.alt}
+            width={image.w}
+            height={image.h}
+            className="max-h-full max-w-full object-contain"
+            decoding="async"
+          />
+        </picture>
 
         <button
           type="button"

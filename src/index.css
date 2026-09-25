@@ -137,3 +137,17 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/*
+ * The Equation finale is the peak of the page (ROUND-03 P0 #4): the real
+ * logo at ~60vw wide on mobile and ~50vh tall on desktop. Width is derived
+ * from the height through the trimmed artwork's aspect (365 × 418).
+ */
+.equation-finale {
+  --finale-w: min(60vw, 26rem);
+}
+@media (min-width: 1024px) {
+  .equation-finale {
+    --finale-w: calc(50vh * 365 / 418);
+  }
+}

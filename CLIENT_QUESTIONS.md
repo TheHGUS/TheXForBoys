@@ -30,18 +30,18 @@ unchanged from round 01._
 
 ---
 
-## 2. The logo file (new — blocks the animation being pixel-exact)
+## 2. The logo file (no longer blocking)
 
-Round 02 rebuilt the logo animation so nothing is redrawn by hand: the real
-white PNG is used for every full-logo moment (intro end state, equation
-finale, nav, footer), and the raised fist “pops” by clipping **the same PNG**
-to the fist region rather than drawing a hand.
+The real white PNG is used for every full-logo moment (intro end state,
+equation finale, nav, footer), and the raised fist “pops” by clipping **the
+same PNG** to the fist region rather than drawing a hand.
 
-- **Please send the vector file** (SVG, EPS or AI). With it we can:
-  - place the fist clip region exactly instead of estimating it
-    (currently `top 3% / right 12% / bottom 62% / left 50%`);
-  - cut a real favicon and print/PDF assets;
-  - set the hero X to match the printed mark exactly.
+Round 03 downloaded the PNG, trimmed its transparent padding (612×612 →
+365×418 artwork) and measured the fist region off the real pixels, so the pop
+is now exact. The favicon is cut from the same PNG.
+
+- **A vector file (SVG, EPS or AI) would still help** for sharper renders at
+  the finale’s ~50vh size on large screens, and for print/PDF assets.
 - Flagged in the UI as `LOGO FILE` on the footer logo (press **Q**).
 
 ## 3. The X for Girls section — needs confirming before we keep it

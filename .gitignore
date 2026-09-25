@@ -18,3 +18,9 @@ dist-ssr
 *.log
 npm-debug.log*
 .arena
+
+# asset download cache (scripts/build-assets.mjs)
+.cache
+
+.vercel
+.env*

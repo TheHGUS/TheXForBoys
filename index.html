@@ -2,7 +2,8 @@
 <html lang="en" class="bg-[#161616]">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="https://img1.wsimg.com/isteam/ip/f58551bb-d6b3-44c4-b114-6ddab0ea1f56/The%20X%20for%20boys%20logo%2004-02%20WHITE.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#161616" />
     <title>Solving for X — The “X” for Boys</title>
@@ -12,15 +13,31 @@
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- non-blocking font CSS: display=swap already covers the fallback -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
-    <link rel="preconnect" href="https://img1.wsimg.com" crossorigin />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <link
       rel="preload"
       as="image"
-      href="https://img1.wsimg.com/isteam/ip/f58551bb-d6b3-44c4-b114-6ddab0ea1f56/DSC06682-2.jpg/:/rs=w:1800"
+      type="image/webp"
+      href="/images/dsc06682-2-1800.webp"
+      imagesrcset="/images/dsc06682-2-900.webp 900w, /images/dsc06682-2-1800.webp 1800w"
+      imagesizes="100vw"
       fetchpriority="high"
     />
   </head>

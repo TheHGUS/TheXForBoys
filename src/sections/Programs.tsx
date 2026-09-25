@@ -92,7 +92,7 @@ export function Programs() {
     <section
       ref={rootRef}
       id="programs"
-      className="relative overflow-hidden border-y border-white/10 bg-[#191919] py-16 sm:py-20 lg:py-28"
+      className="relative overflow-hidden border-y border-white/10 bg-[#191919] pb-16 pt-14 sm:pb-20 sm:pt-16 lg:pb-28 lg:pt-14"
       aria-labelledby="programs-heading"
     >
       <XPattern opacity={0.035} size={150} />
@@ -249,20 +249,22 @@ function Ticket({ item, index }: { item: Item; index: number }) {
             </div>
             <div className="relative mt-4 h-14">
               <Stamp label={item.stamp ?? 'WEEKLY'} className="stamp absolute left-0 top-0 h-14 w-auto text-red" rotate={-8} />
-              <Stamp label={item.stamp ?? 'WEEKLY'} className="stamp absolute left-[38%] top-1 h-12 w-auto text-red/80" rotate={7} seed={44} />
+              {/* second stamp clears the first at 375 (they overlapped at 38%) */}
+              <Stamp label={item.stamp ?? 'WEEKLY'} className="stamp absolute left-[52%] top-1 h-12 w-auto text-red/80 sm:left-[38%]" rotate={7} seed={44} />
             </div>
           </div>
         ) : null}
 
         {/* ---- paper-clipped snapshot ---- */}
-        <div className="relative mt-6">
-          <div className="relative ml-auto w-[62%] rotate-[2deg] border-2 border-off bg-off p-1.5 shadow-[0_10px_24px_-8px_rgba(0,0,0,0.55)]">
+        {/* footer line and snapshot share a row, so the photo never covers the text */}
+        <div className="mt-6 flex items-end justify-between gap-3">
+          <MonoLabel className="mb-1 min-w-0 text-ink/70">
+            {isCard ? 'BOOK CLUB — WEEKLY' : item.id === 'home' ? 'SITE: ALBANY, GA' : 'SHOP BAY 01'}
+          </MonoLabel>
+          <div className="relative w-[62%] shrink-0 rotate-[2deg] border-2 border-off bg-off p-1.5 shadow-[0_10px_24px_-8px_rgba(0,0,0,0.55)]">
             <Img image={photo} className="aspect-[4/3] w-full" sizes="(min-width: 1024px) 22vw, 55vw" />
             <BulldogClip className="absolute -top-5 left-4 h-8 w-auto text-ink/75" />
           </div>
-          <MonoLabel className="absolute bottom-1 left-0 text-ink/70">
-            {isCard ? 'BOOK CLUB — WEEKLY' : item.id === 'home' ? 'SITE: ALBANY, GA' : 'SHOP BAY 01'}
-          </MonoLabel>
         </div>
       </article>
     </div>

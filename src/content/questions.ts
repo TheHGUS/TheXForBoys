@@ -70,7 +70,7 @@ export const questions = {
   'q-logo-vector': {
     label: 'LOGO FILE',
     question:
-      'We only have the white PNG. Please send the vector (SVG / EPS / AI) so the fist-pop animation can be pixel-exact, and so we can cut a proper favicon and print files.',
+      'We work from the white PNG (fist region measured off its pixels, favicon cut from it). A vector (SVG / EPS / AI) would still give sharper large renders and print files.',
   },
   'q-email-signup': {
     label: 'NO BACKEND',

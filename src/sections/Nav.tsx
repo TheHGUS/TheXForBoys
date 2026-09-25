@@ -129,9 +129,12 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
           </div>
         </div>
 
-        {/* scroll progress: a 2px red line along the bottom edge */}
+        {/*
+          scroll progress: a 2px line along the bottom edge. The track is an
+          8% off-white hairline; only the inner bar is red, scaled 0 -> 1.
+        */}
         <span
-          className="absolute inset-x-0 bottom-0 block h-[2px] origin-left bg-red"
+          className="absolute inset-x-0 bottom-0 block h-[2px] bg-off/[0.08]"
           aria-hidden="true"
         >
           <span ref={progressRef} className="block h-full w-full origin-left scale-x-0 bg-red" />
