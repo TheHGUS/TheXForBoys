@@ -69,17 +69,39 @@ function useProgressiveMount(total: number): number {
 function scrollToHashOnLoad(): void {
   const id = decodeURIComponent(window.location.hash.slice(1));
   if (!id) return;
-  const go = () => {
+  // Images, fonts and ScrollTrigger pin spacers keep shifting the layout for
+  // a moment after mount, so keep re-aiming until the section holds still
+  // under the nav — and stop the moment the visitor scrolls themselves.
+  let tries = 0;
+  let steady = 0;
+  let cancelled = false;
+  const cancel = () => { cancelled = true; };
+  window.addEventListener('wheel', cancel, { once: true, passive: true });
+  window.addEventListener('touchstart', cancel, { once: true, passive: true });
+  const tick = () => {
+    if (cancelled) return;
     const el = document.getElementById(id);
-    if (!el) return;
-    const l = getLenis();
-    if (l) l.scrollTo(el, { offset: -68, immediate: true, force: true });
-    else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 68, behavior: 'auto' });
-    ScrollTrigger.update();
+    if (el) {
+      const off = el.getBoundingClientRect().top - 68;
+      if (Math.abs(off) < 4) steady += 1;
+      else {
+        steady = 0;
+        const l = getLenis();
+        if (l) {
+          l.resize();
+          l.scrollTo(el, { offset: -68, immediate: true, force: true });
+        } else window.scrollTo({ top: window.scrollY + off, behavior: 'auto' });
+        ScrollTrigger.update();
+      }
+    }
+    tries += 1;
+    if (steady < 3 && tries < 24) window.setTimeout(tick, 150);
+    else {
+      window.removeEventListener('wheel', cancel);
+      window.removeEventListener('touchstart', cancel);
+    }
   };
-  // after layout + ScrollTrigger pin spacers settle, then once more to be safe
-  window.requestAnimationFrame(() => window.setTimeout(go, 60));
-  window.setTimeout(go, 700);
+  window.requestAnimationFrame(tick);
 }
 
 export default function App() {
