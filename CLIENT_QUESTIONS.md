@@ -24,21 +24,7 @@ feedback only, since the form isn't connected yet (`NO BACKEND` flag).
 
 ---
 
-## 2. The logo file (no longer blocking)
-
-The real white PNG is used for every full-logo moment (intro end state,
-equation finale, nav, footer), and the raised fist “pops” by clipping **the
-same PNG** to the fist region rather than drawing a hand.
-
-Round 03 downloaded the PNG, trimmed its transparent padding (612×612 →
-365×418 artwork) and measured the fist region off the real pixels, so the pop
-is now exact. The favicon is cut from the same PNG.
-
-- **A vector file (SVG, EPS or AI) would still help** for sharper renders at
-  the finale’s ~50vh size on large screens, and for print/PDF assets.
-- Flagged in the UI as `LOGO FILE` on the footer logo (press **Q**).
-
-## 3. The X for Girls section — needs confirming before we keep it
+## 2. The X for Girls section — needs confirming before we keep it
 
 - **What is the program actually called?** The donate block says “The X for
   Boys & Girls”. Is the official name *The X for Boys & Girls*, or is there a
@@ -54,7 +40,7 @@ is now exact. The favicon is cut from the same PNG.
 
 ---
 
-## 4. The Albany statistic
+## 3. The Albany statistic
 
 > “Albany, GA has the highest concentrated poverty rate in Georgia. It is also
 > ranked the 7th most dangerous city in U.S. with offenders being most likely
@@ -72,7 +58,7 @@ is now exact. The favicon is cut from the same PNG.
 
 ---
 
-## 5. Social handles
+## 4. Social handles
 
 The site says **“Follow @thexforboys”**, but the links we were given point at:
 
@@ -90,7 +76,7 @@ The site says **“Follow @thexforboys”**, but the links we were given point a
 
 ---
 
-## 6. Also worth a decision (lower priority)
+## 5. Also worth a decision (lower priority)
 
 - **Programme treatment:** the three workshops are printed on the real paper
   they belong to — a work order, a job ticket, a library checkout card — each
