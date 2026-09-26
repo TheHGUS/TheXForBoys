@@ -77,7 +77,8 @@ function Receipt({ item, index }: { item: Item; index: number }) {
       {/* the sheet's header: what it is and its number */}
       <header className="flex items-baseline justify-between gap-3 border-b border-dashed border-ink/25 px-5 pb-3 pt-5 sm:px-6">
         <span className="font-mono text-[0.68rem] uppercase tracking-[0.18em] text-ink/70">{item.object}</span>
-        <span className="font-mono text-[0.68rem] uppercase tracking-[0.18em] text-red">{item.number}</span>
+        {/* deep red: brand red is too light for AA at this small size */}
+        <span className="font-mono text-[0.68rem] uppercase tracking-[0.18em] text-deepred">{item.number}</span>
       </header>
 
       <div className="flex flex-1 flex-col px-5 pb-6 pt-5 sm:px-6">

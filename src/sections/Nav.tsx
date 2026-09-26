@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LogoImage } from '../components/LogoImage';
 import { SocialIcon, type SocialId } from '../components/svg/Social';
 import { Img } from '../components/ui';
-import { connect, nav, site } from '../content/copy';
+import { connect, nav } from '../content/copy';
 import { HERO_MAIN } from '../content/images';
 import { lockScroll, scrollToId, unlockScroll } from '../lib/scroll';
 
@@ -88,7 +88,8 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
         }`}
       >
         <div className="mx-auto flex h-[68px] w-full max-w-shell items-center justify-between gap-4 px-5 sm:px-8 lg:px-14">
-          <a href="#top" onClick={go('#top')} aria-label={`${site.name} — home`}>
+          {/* accessible name comes from the visible words: "The X for Boys" */}
+          <a href="#top" onClick={go('#top')}>
             {brand}
           </a>
 
