@@ -123,7 +123,7 @@ export const albany = {
 
 export const girls = {
   title: 'Donate to The X for Boys & Girls', // [VERBATIM]
-  cta: 'DONATE!', // [VERBATIM]
+  cta: 'DONATE', // their "DONATE!", without the exclamation mark (client's request)
 } as const;
 
 export const club = {

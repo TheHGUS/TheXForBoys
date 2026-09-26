@@ -4,7 +4,6 @@ import { useReducedMotion } from '../lib/motion';
 import { albany, links } from '../content/copy';
 import { SECTION_ALBANY, STORY_1, STORY_2, STORY_3 } from '../content/images';
 import { Accented, Img } from '../components/ui';
-import { LogoX } from '../components/LogoImage';
 import { ShieldFrame } from '../components/Shield';
 
 /**
@@ -14,8 +13,7 @@ import { ShieldFrame } from '../components/Shield';
  *                    city photograph drifting slower than the page.
  *   2. THE BOYS      three of their photos, in the club's shield, rise past at
  *                    three different speeds.
- *   3. THE ASK       the X from their logo, their own "Donate to The X" block
- *                    and its button.
+ *   3. THE ASK       their own "Donate to The X" block and its button.
  *
  * Every word is theirs. Parallax is transform-only and scrubbed to scroll;
  * reduced motion gets the same layout, still.
@@ -114,8 +112,7 @@ export function Albany() {
         </ul>
 
         {/* ---------------- 3. the ask ---------------- */}
-        <div className="mt-14 flex flex-col items-start gap-6 sm:mt-24 lg:mt-20 lg:flex-row lg:items-center lg:gap-12">
-          <LogoX className="h-[20vmin] w-auto shrink-0 lg:h-[24vmin]" />
+        <div className="mt-14 sm:mt-24 lg:mt-20">
           <div>
             <h2 className="display text-white" style={{ fontSize: 'clamp(2rem, 4.6vw, 3.8rem)' }}>
               <Accented text={albany.askHeading} accent={albany.askAccent} />

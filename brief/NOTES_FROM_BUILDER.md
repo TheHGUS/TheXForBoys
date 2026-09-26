@@ -479,3 +479,6 @@ screens in `brief/screens/round-06/`.
   *The X*" and the hero's "Solving for X".
 - **Footer:** the name beside the logo uses a plain X, and "Solving for X" is
   removed. That studio line now appears once, in the hero.
+- Removed the large logo X in front of "Donate to The X" (redundant). The
+  Girls button reads **DONATE** (their "DONATE!" without the exclamation mark,
+  at the client's request).
