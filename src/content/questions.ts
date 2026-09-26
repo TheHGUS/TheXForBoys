@@ -26,11 +26,6 @@ export const questions = {
     label: 'PAYPAL',
     question: '“GIVE” currently links to their /donate page (PayPal). Confirm the real PayPal button / link for the next stage.',
   },
-  'q-logo-vector': {
-    label: 'LOGO FILE',
-    question:
-      'We work from the white PNG (fist region measured off its pixels, favicon cut from it). A vector (SVG / EPS / AI) would still give sharper large renders and print files.',
-  },
   'q-email-signup': {
     label: 'NO BACKEND',
     question: 'The email signup is front-end only — it confirms on screen but sends nothing. Confirm where signups should go.',
