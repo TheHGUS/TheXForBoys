@@ -113,7 +113,7 @@ export function Nav({ logoRef }: { logoRef: React.RefObject<HTMLElement> }) {
               href={nav.ctaHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden rounded-lg bg-red px-5 py-2.5 font-sans text-[0.82rem] font-semibold text-white transition-colors duration-200 hover:bg-deepred sm:inline-block"
+              className="inline-block rounded-lg bg-red px-3.5 py-2 font-sans text-[0.78rem] font-semibold text-white transition-colors duration-200 hover:bg-deepred sm:px-5 sm:py-2.5 sm:text-[0.82rem]"
             >
               {nav.cta}
             </a>

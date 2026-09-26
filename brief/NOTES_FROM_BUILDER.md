@@ -482,3 +482,8 @@ screens in `brief/screens/round-06/`.
 - Removed the large logo X in front of "Donate to The X" (redundant). The
   Girls button reads **DONATE** (their "DONATE!" without the exclamation mark,
   at the client's request).
+- **Sticky Donate:** the header's DONATE button now shows at every width,
+  including phones (it was hidden below 640px). The header is fixed, so
+  Donate is always one tap away.
+- **Footer credit** "Designed by The Harmon Group" links to
+  https://www.thehgus.com (opens in a new tab).

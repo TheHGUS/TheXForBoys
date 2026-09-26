@@ -166,6 +166,8 @@ section('Menus and footer');
   );
   check('footer nav includes Donate', /<nav[^>]*>[\s\S]*?>Donate<[\s\S]*?<\/nav>/.test(html.footer));
   check('footer credit reads "Designed by The Harmon Group"', html.footer.includes('Designed by The Harmon Group'));
+  check('footer credit links to thehgus.com', /href="https:\/\/www\.thehgus\.com"[^>]*>Designed by The Harmon Group</.test(html.footer));
+  check('the Donate button is in the header at every width', /<header[\s\S]*?class="inline-block rounded-lg bg-red[^"]*"[^>]*>DONATE</.test(html.nav));
   check('no "Q — client notes" hint in the footer', !/client notes/i.test(html.footer));
   check('copyright and credit never wrap', (html.footer.match(/whitespace-nowrap/g) ?? []).length >= 2);
   check('socials live in the footer', /aria-label="Instagram/.test(html.footer));

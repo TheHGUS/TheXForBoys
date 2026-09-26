@@ -15,6 +15,7 @@ export const site = {
   name: 'The "X" for Boys', // [VERBATIM] as in their copyright line
   shortName: 'The X for Boys',
   credit: 'Designed by The Harmon Group',
+  creditHref: 'https://www.thehgus.com',
   copyright: 'Copyright © 2026 The "X" for Boys - All Rights Reserved.', // [VERBATIM]
 } as const;
 

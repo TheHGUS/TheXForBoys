@@ -73,7 +73,14 @@ export function Footer() {
             {site.copyright}
           </p>
           <p className="whitespace-nowrap text-[0.66rem] text-white/55 min-[400px]:text-[0.72rem] sm:text-[0.8rem]">
-            {site.credit}
+            <a
+              href={site.creditHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-white/30 underline-offset-2 transition-colors duration-200 hover:text-white hover:decoration-red"
+            >
+              {site.credit}
+            </a>
           </p>
         </div>
       </div>
