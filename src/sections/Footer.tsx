@@ -20,7 +20,6 @@ export function Footer() {
               <span>
                 <span className="block font-sans text-[1.2rem] font-bold tracking-tighter">{site.name}</span>
               </span>
-              <Flag id="q-logo-vector" place="bl" />
             </span>
           </div>
 
